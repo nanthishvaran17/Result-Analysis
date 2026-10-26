@@ -1362,86 +1362,128 @@ export const ResultAnalysis: React.FC<ResultAnalysisProps> = ({ activeSessionId,
         isOpen={Boolean(inspectedRow)}
         onClose={() => setInspectedRow(null)}
         title={`Candidate Marksheet Inspection: ${inspectedRow?.register_number}`}
-        subtitle={`${inspectedRow?.student_name} | ${inspectedRow?.department_code} | Semester ${inspectedRow?.semester}`}
-        icon={<Award className="w-5 h-5 text-indigo-600" />}
-        maxWidth="max-w-3xl"
+        subtitle={inspectedRow ? `${inspectedRow.student_name}  •  Department: ${inspectedRow.department_code}  •  Semester ${inspectedRow.semester}` : ''}
+        icon={<Award className="w-5 h-5 text-blue-600" />}
+        maxWidth="max-w-4xl"
       >
         {inspectedRow && (
           <div className="space-y-5 text-xs">
-            {/* Quick KPI Strip */}
-            <div className="grid grid-cols-4 gap-3 text-center">
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <span className="block text-[10px] text-slate-500 font-bold uppercase">SGPA</span>
-                <span className="text-xl font-bold text-blue-600 font-mono">
+            {/* Quick KPI Strip with Pixel-Perfect Alignment */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="flex flex-col items-center justify-center py-3.5 px-3 bg-slate-50/80 rounded-2xl border border-slate-200/90 shadow-2xs">
+                <span className="text-[10px] font-extrabold tracking-wider text-slate-500 uppercase mb-1">
+                  SGPA
+                </span>
+                <span className="h-8 flex items-center justify-center text-2xl font-black text-blue-600 font-mono">
                   {inspectedRow.gpa.toFixed(2)}
                 </span>
               </div>
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <span className="block text-[10px] text-slate-500 font-bold uppercase">Current Arrears</span>
-                <span className={`text-xl font-bold font-mono ${inspectedRow.arrears_count > 0 ? 'text-rose-600' : 'text-slate-800'}`}>
+
+              <div className="flex flex-col items-center justify-center py-3.5 px-3 bg-slate-50/80 rounded-2xl border border-slate-200/90 shadow-2xs">
+                <span className="text-[10px] font-extrabold tracking-wider text-slate-500 uppercase mb-1">
+                  Current Arrears
+                </span>
+                <span className={`h-8 flex items-center justify-center text-2xl font-black font-mono ${
+                  inspectedRow.arrears_count > 0 ? 'text-rose-600' : 'text-slate-800'
+                }`}>
                   {inspectedRow.arrears_count}
                 </span>
               </div>
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <span className="block text-[10px] text-slate-500 font-bold uppercase">Standing Arrears</span>
-                <span className={`text-xl font-bold font-mono ${inspectedRow.standing_arrears_count > 0 ? 'text-amber-600' : 'text-slate-800'}`}>
+
+              <div className="flex flex-col items-center justify-center py-3.5 px-3 bg-slate-50/80 rounded-2xl border border-slate-200/90 shadow-2xs">
+                <span className="text-[10px] font-extrabold tracking-wider text-slate-500 uppercase mb-1">
+                  Standing Arrears
+                </span>
+                <span className={`h-8 flex items-center justify-center text-2xl font-black font-mono ${
+                  inspectedRow.standing_arrears_count > 0 ? 'text-amber-600' : 'text-slate-800'
+                }`}>
                   {inspectedRow.standing_arrears_count}
                 </span>
               </div>
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <span className="block text-[10px] text-slate-500 font-bold uppercase">Final Result</span>
-                <span className={`text-base font-bold block mt-1 ${inspectedRow.result_status === 'PASS' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  {inspectedRow.result_status}
+
+              <div className="flex flex-col items-center justify-center py-3.5 px-3 bg-slate-50/80 rounded-2xl border border-slate-200/90 shadow-2xs">
+                <span className="text-[10px] font-extrabold tracking-wider text-slate-500 uppercase mb-1">
+                  Final Result
                 </span>
+                <div className="h-8 flex items-center justify-center">
+                  <span className={`px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase border shadow-2xs ${
+                    inspectedRow.result_status === 'PASS'
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      : 'bg-rose-50 text-rose-700 border-rose-200'
+                  }`}>
+                    {inspectedRow.result_status}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Courses Breakdown Table */}
-            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-100 text-slate-700 font-bold">
+            {/* Courses Breakdown Table with Balanced Column Proportions */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead className="bg-slate-100/90 border-b border-slate-200 text-slate-700">
                   <tr>
-                    <th className="py-2.5 px-3">Course Code</th>
-                    <th className="py-2.5 px-3">Course Name</th>
-                    <th className="py-2.5 px-3 text-center">Credits</th>
-                    <th className="py-2.5 px-3 text-center">Letter Grade</th>
-                    <th className="py-2.5 px-3 text-center">Result</th>
+                    <th className="py-3 px-4 w-32 font-bold text-[11px] uppercase tracking-wider">
+                      Course Code
+                    </th>
+                    <th className="py-3 px-4 font-bold text-[11px] uppercase tracking-wider">
+                      Course Name
+                    </th>
+                    <th className="py-3 px-4 w-24 text-center font-bold text-[11px] uppercase tracking-wider">
+                      Credits
+                    </th>
+                    <th className="py-3 px-4 w-28 text-center font-bold text-[11px] uppercase tracking-wider">
+                      Letter Grade
+                    </th>
+                    <th className="py-3 px-4 w-28 text-center font-bold text-[11px] uppercase tracking-wider">
+                      Result
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium">
                   {matrix?.columns.map((col) => {
                     const grade = inspectedRow.grades[col.code] || '-';
-                    const isArrear = ['RA', 'SA', 'AB', 'W'].includes(grade);
+                    const isArrear = ['RA', 'SA', 'AB', 'W', 'U'].includes(grade);
+                    const isHigh = ['O', 'A+'].includes(grade);
                     return (
-                      <tr key={col.code} className="hover:bg-slate-50">
-                        <td className="py-2.5 px-3 font-mono font-bold text-slate-900">{col.code}</td>
-                        <td className="py-2.5 px-3 text-slate-700 font-medium">{col.name}</td>
-                        <td className="py-2.5 px-3 text-center font-bold text-slate-600">{col.credits}</td>
-                        <td className="py-2.5 px-3 text-center">
-                          <span
-                            className={`px-2 py-0.5 rounded-md font-bold font-mono text-xs ${
-                              isArrear
-                                ? 'bg-rose-100 text-rose-700'
-                                : grade !== '-'
-                                ? 'bg-emerald-50 text-emerald-700'
-                                : 'text-slate-300'
-                            }`}
-                          >
-                            {grade}
-                          </span>
+                      <tr key={col.code} className="hover:bg-slate-50/70 transition-colors">
+                        <td className="py-3 px-4 font-mono font-bold text-slate-900">
+                          {col.code}
                         </td>
-                        <td className="py-2.5 px-3 text-center">
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              isArrear
-                                ? 'bg-rose-50 text-rose-700'
-                                : grade !== '-'
-                                ? 'bg-emerald-50 text-emerald-700'
-                                : 'text-slate-400'
-                            }`}
-                          >
-                            {isArrear ? 'FAIL' : grade !== '-' ? 'PASS' : '-'}
-                          </span>
+                        <td className="py-3 px-4 text-slate-800 font-medium">
+                          {col.name}
+                        </td>
+                        <td className="py-3 px-4 text-center font-mono font-bold text-slate-700">
+                          {col.credits}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          {grade === '-' ? (
+                            <span className="text-slate-300 font-mono">-</span>
+                          ) : isArrear ? (
+                            <span className="inline-flex items-center justify-center min-w-[36px] px-2 py-0.5 rounded-lg font-bold font-mono text-xs bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs">
+                              {grade}
+                            </span>
+                          ) : isHigh ? (
+                            <span className="inline-flex items-center justify-center min-w-[36px] px-2 py-0.5 rounded-lg font-bold font-mono text-xs bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs">
+                              {grade}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center justify-center min-w-[36px] px-2 py-0.5 rounded-lg font-semibold font-mono text-xs text-slate-700 bg-slate-50 border border-slate-200">
+                              {grade}
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          {grade === '-' ? (
+                            <span className="text-slate-300 font-mono">-</span>
+                          ) : isArrear ? (
+                            <span className="inline-flex items-center justify-center min-w-[56px] px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
+                              FAIL
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center justify-center min-w-[56px] px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              PASS
+                            </span>
+                          )}
                         </td>
                       </tr>
                     );
@@ -1450,41 +1492,42 @@ export const ResultAnalysis: React.FC<ResultAnalysisProps> = ({ activeSessionId,
               </table>
             </div>
 
-            {/* Modal Footer Actions */}
-            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+            {/* Modal Footer Actions - Aligned with Uniform Button Heights */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-3.5 border-t border-slate-100">
               <div className="flex items-center gap-2">
                 {inspectedRow.is_verified ? (
-                  <span className="flex items-center gap-1.5 text-emerald-600 font-bold text-xs">
-                    <ShieldCheck className="w-4 h-4" />
+                  <span className="flex items-center gap-1.5 text-emerald-700 font-bold text-xs bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
                     <span>Digitally Authenticated Marksheet</span>
                   </span>
                 ) : (
                   <button
                     onClick={() => handleVerify(inspectedRow.student_id, inspectedRow.register_number)}
-                    className="px-3 py-1.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors cursor-pointer"
+                    className="h-9 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-colors cursor-pointer text-xs flex items-center gap-1.5 shadow-2xs"
                   >
-                    Authenticate Marksheet
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>Authenticate Marksheet</span>
                   </button>
                 )}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 <button
                   onClick={() => handlePreviewPdf(inspectedRow.register_number)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl font-bold border border-blue-200 transition-all cursor-pointer text-xs"
+                  className="h-9 flex items-center gap-1.5 px-3.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl font-bold border border-blue-200 transition-all cursor-pointer text-xs"
                 >
                   <Eye className="w-3.5 h-3.5 text-blue-600" />
                   <span>Preview PDF</span>
                 </button>
                 <button
                   onClick={() => handleDownloadPdf(inspectedRow.register_number)}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold transition-all shadow-sm cursor-pointer text-xs"
+                  className="h-9 flex items-center gap-1.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold transition-all shadow-sm cursor-pointer text-xs"
                 >
                   <Download className="w-3.5 h-3.5 text-blue-400" />
                   <span>Download Official PDF</span>
                 </button>
                 <button
                   onClick={() => setInspectedRow(null)}
-                  className="px-3.5 py-1.5 border border-slate-300 rounded-xl text-slate-600 font-bold hover:bg-slate-50 cursor-pointer text-xs"
+                  className="h-9 px-4 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl text-slate-700 font-bold transition-colors cursor-pointer text-xs"
                 >
                   Close
                 </button>

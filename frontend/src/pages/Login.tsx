@@ -281,38 +281,95 @@ export const Login: React.FC = () => {
             </p>
           </div>
 
-          {/* TAB SWITCHER: Password vs Secure OTP */}
-          <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-xl border border-slate-200 mb-3.5 shadow-2xs">
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('password');
-                setError(null);
-              }}
-              className={`py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                authMode === 'password'
-                  ? 'bg-white text-blue-700 shadow-xs border border-slate-200/80 ring-1 ring-black/5'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Lock className="w-3.5 h-3.5" />
-              <span>Password</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('otp');
-                setError(null);
-              }}
-              className={`py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                authMode === 'otp'
-                  ? 'bg-white text-blue-700 shadow-xs border border-slate-200/80 ring-1 ring-black/5'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Smartphone className="w-3.5 h-3.5" />
-              <span>Secure OTP</span>
-            </button>
+          {/* ========================================================================= */}
+          {/* 3 ROLE CLEARANCE CARDS: MOVED TO TOP FOR INSTANT 1-CLICK ACCESS           */}
+          {/* ========================================================================= */}
+          <div className="mb-3.5 p-3 rounded-2xl bg-slate-50 border border-slate-200/90 shadow-2xs">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span className="text-[10.5px] font-black text-slate-800 uppercase tracking-wider">
+                  Select Role (1-Click Autofill)
+                </span>
+              </div>
+              <span className="text-[9px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-bold uppercase tracking-wider">
+                Instant Access
+              </span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              {DEMO_ROLES.map((role) => {
+                const isSelected = selectedRole === role.id;
+                return (
+                  <button
+                    key={role.id}
+                    type="button"
+                    onClick={() => selectRole(role)}
+                    className={`relative p-2.5 rounded-xl text-left border transition-all cursor-pointer group flex flex-col justify-between ${
+                      isSelected
+                        ? 'bg-blue-50 border-blue-500 text-blue-950 ring-2 ring-blue-500/30 shadow-xs'
+                        : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700 hover:bg-slate-50 shadow-2xs'
+                    }`}
+                  >
+                    {/* Top row with icon & tier */}
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div
+                        className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
+                          role.id === 'admin'
+                            ? 'bg-blue-100 text-blue-700'
+                            : role.id === 'officer'
+                            ? 'bg-indigo-100 text-indigo-700'
+                            : 'bg-emerald-100 text-emerald-700'
+                        }`}
+                      >
+                        {role.id === 'admin' && <Shield className="w-3.5 h-3.5" />}
+                        {role.id === 'officer' && <FileSpreadsheet className="w-3.5 h-3.5" />}
+                        {role.id === 'auditor' && <Award className="w-3.5 h-3.5" />}
+                      </div>
+
+                      <span
+                        className={`text-[8.5px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                          isSelected
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+                        }`}
+                      >
+                        {role.tier}
+                      </span>
+                    </div>
+
+                    {/* Middle: Title & Role */}
+                    <div>
+                      <div className="font-extrabold text-[11px] leading-tight text-slate-900 truncate">
+                        {role.label}
+                      </div>
+                      <div className="text-[9px] text-slate-500 leading-tight mt-0.5 truncate">
+                        {role.roleTitle}
+                      </div>
+                    </div>
+
+                    {/* Bottom: Username badge */}
+                    <div className="mt-1.5 pt-1 border-t border-slate-100 flex items-center justify-between">
+                      <span className="font-mono text-[9px] text-slate-700 font-bold truncate">
+                        @{role.username}
+                      </span>
+                      {isSelected && (
+                        <Check className="w-3 h-3 text-blue-600 shrink-0" />
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* DIVIDER */}
+          <div className="flex items-center gap-3 my-3">
+            <div className="flex-1 h-px bg-slate-200" />
+            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">
+              or enter credentials
+            </span>
+            <div className="flex-1 h-px bg-slate-200" />
           </div>
 
           {/* ERROR ALERT */}
