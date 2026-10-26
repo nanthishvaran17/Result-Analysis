@@ -156,3 +156,56 @@ def download_pdf_by_filename(
         media_type="application/pdf",
         filename=clean_filename
     )
+
+
+@router.get("/details/{reg_no}")
+def get_marksheet_details(
+    reg_no: str,
+    session_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    student = db.query(Student).filter(Student.register_number == reg_no.strip()).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    sess_query = db.query(ExamSession)
+    if session_id:
+        sess = sess_query.filter(ExamSession.id == session_id).first()
+    else:
+        sess = sess_query.filter(ExamSession.is_active == True).first() or sess_query.order_by(ExamSession.id.desc()).first()
+
+    res = db.query(StudentResult).filter(
+        StudentResult.student_id == student.id,
+        StudentResult.session_id == (sess.id if sess else 1)
+    ).first()
+
+    courses = []
+    if res:
+        for sr in res.subject_results:
+            courses.append({
+                "code": sr.subject.code if sr.subject else "N/A",
+                "name": sr.subject.name if sr.subject else "N/A",
+                "grade": sr.grade,
+                "result": sr.result_status,
+                "credits": sr.credits
+            })
+
+    dept_name = student.department.name if student.department else student.department_code
+    batch_year = student.batch.split("-")[1] if "-" in student.batch else "2026"
+
+    return {
+        "register_number": student.register_number,
+        "student_name": student.name,
+        "department_code": student.department_code,
+        "branch_name": f"B.E - {dept_name.upper()}",
+        "batch": student.batch,
+        "semester": student.current_semester,
+        "year_of_passing": f"Apr/May-{batch_year}",
+        "session_code": sess.session_code if sess else "NOV_DEC_2025",
+        "session_name": sess.session_name if sess else "Nov/Dec 2025 Autonomous Examinations",
+        "academic_year": sess.academic_year if sess else "2025-2026",
+        "courses": courses,
+        "gpa": res.gpa if res else 0.0,
+        "result_status": res.result_status if res else "PASS"
+    }
