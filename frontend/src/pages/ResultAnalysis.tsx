@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   Search,
   CheckCircle2,
@@ -13,13 +13,20 @@ import {
   Users,
   Trophy,
   AlertTriangle,
-  BarChart3
+  BarChart3,
+  Building2,
+  Calendar,
+  GraduationCap,
+  Filter,
+  RotateCcw,
+  X
 } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useDossier } from '../context/DossierContext';
 import { Modal } from '../components/Modal';
+import { CustomDropdown, type DropdownOption } from '../components/CustomDropdown';
 import type {
   ResultMatrix,
   Department,
@@ -56,6 +63,33 @@ export const ResultAnalysis: React.FC<ResultAnalysisProps> = ({ activeSessionId,
 
   // Marksheet inspection modal
   const [inspectedRow, setInspectedRow] = useState<StudentMatrixRow | null>(null);
+
+  const departmentOptions: DropdownOption[] = useMemo(() => [
+    { value: '', label: 'All Departments', badge: 'ALL' },
+    ...departments.map((d) => ({
+      value: d.code,
+      label: `${d.code} - ${d.name}`,
+      badge: d.code,
+      sublabel: d.name
+    }))
+  ], [departments]);
+
+  const batchOptions: DropdownOption[] = [
+    { value: '2022-2026', label: '2022-2026', badge: '22-26', sublabel: 'Final Year Cohort' },
+    { value: '2023-2027', label: '2023-2027', badge: '23-27', sublabel: 'Third Year Cohort' },
+    { value: '2024-2028', label: '2024-2028', badge: '24-28', sublabel: 'Second Year Cohort' },
+    { value: '2025-2029', label: '2025-2029', badge: '25-29', sublabel: 'First Year Cohort' },
+  ];
+
+  const semesterOptions: DropdownOption[] = [
+    { value: '', label: 'All Semesters', badge: 'ALL' },
+    ...[1, 2, 3, 4, 5, 6, 7, 8].map((s) => ({
+      value: s,
+      label: `Semester ${s}`,
+      badge: `SEM ${s}`,
+      sublabel: `Term ${s} Evaluation`
+    }))
+  ];
 
   const fetchMatrix = async () => {
     try {
@@ -415,55 +449,98 @@ export const ResultAnalysis: React.FC<ResultAnalysisProps> = ({ activeSessionId,
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
-        <div className="flex-1 min-w-[260px] relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search candidate name, register number or subject..."
-            className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600 font-medium transition-all"
-          />
+      {/* Executive Cohort Filter & Search Console */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <Filter className="w-3.5 h-3.5" />
+            </div>
+            <span className="text-xs font-bold text-slate-800">
+              Cohort & Candidate Filter Console
+            </span>
+            <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+              <span>Cohort:</span>
+              <strong className="text-blue-700">{selectedDept || 'All Branches'}</strong>
+              <span>•</span>
+              <strong className="text-slate-800">{selectedBatch}</strong>
+              <span>•</span>
+              <strong className="text-indigo-700">{selectedSemester ? `Sem ${selectedSemester}` : 'All Semesters'}</strong>
+            </span>
+          </div>
+
+          {(selectedDept !== 'CSE' || selectedBatch !== '2022-2026' || selectedSemester !== 5 || search) && (
+            <button
+              onClick={() => {
+                setSelectedDept('CSE');
+                setSelectedBatch('2022-2026');
+                setSelectedSemester(5);
+                setSearch('');
+              }}
+              className="flex items-center gap-1 text-[11px] font-bold text-slate-500 hover:text-rose-600 transition-colors cursor-pointer"
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>Reset Filters</span>
+            </button>
+          )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <select
-            value={selectedDept}
-            onChange={(e) => setSelectedDept(e.target.value)}
-            className="px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-hidden cursor-pointer"
-          >
-            <option value="">All Departments</option>
-            {departments.map((d) => (
-              <option key={d.code} value={d.code}>
-                {d.code} - {d.name}
-              </option>
-            ))}
-          </select>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+          {/* Candidate / Course Live Search Input */}
+          <div className="md:col-span-5 relative">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search candidate name, register number (7100...), or course..."
+              className="w-full pl-10 pr-9 py-2.5 text-xs bg-slate-50/70 border border-slate-200 rounded-xl focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 font-medium transition-all"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="p-1 text-slate-400 hover:text-slate-600 absolute right-2.5 top-2.5 cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
 
-          <select
-            value={selectedBatch}
-            onChange={(e) => setSelectedBatch(e.target.value)}
-            className="px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-hidden cursor-pointer"
-          >
-            <option value="2022-2026">2022-2026</option>
-            <option value="2023-2027">2023-2027</option>
-            <option value="2024-2028">2024-2028</option>
-          </select>
+          {/* Department Custom Dropdown */}
+          <div className="md:col-span-3">
+            <CustomDropdown
+              label="Academic Department"
+              icon={Building2}
+              options={departmentOptions}
+              value={selectedDept}
+              onChange={(val) => setSelectedDept(val)}
+              minWidth="min-w-[320px]"
+            />
+          </div>
 
-          <select
-            value={selectedSemester}
-            onChange={(e) => setSelectedSemester(e.target.value ? Number(e.target.value) : '')}
-            className="px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-hidden cursor-pointer"
-          >
-            <option value="">All Semesters</option>
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
-              <option key={s} value={s}>
-                Semester {s}
-              </option>
-            ))}
-          </select>
+          {/* Academic Batch Custom Dropdown */}
+          <div className="md:col-span-2">
+            <CustomDropdown
+              label="Academic Batch"
+              icon={Calendar}
+              options={batchOptions}
+              value={selectedBatch}
+              onChange={(val) => setSelectedBatch(val)}
+              minWidth="min-w-[200px]"
+            />
+          </div>
+
+          {/* Semester Custom Dropdown */}
+          <div className="md:col-span-2">
+            <CustomDropdown
+              label="Examination Semester"
+              icon={GraduationCap}
+              options={semesterOptions}
+              value={selectedSemester}
+              onChange={(val) => setSelectedSemester(val)}
+              minWidth="min-w-[200px]"
+            />
+          </div>
         </div>
       </div>
 
