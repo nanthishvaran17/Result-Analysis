@@ -265,6 +265,7 @@ def import_or_update_live_result(
             batch="2022-2026",
             current_semester=6,
             section="A",
+            dob=dob,
             email=f"{reg_no.lower()}@nandhaengg.org",
             is_active=True
         )
@@ -274,6 +275,7 @@ def import_or_update_live_result(
     else:
         student.name = name
         student.department_code = dept_code
+        student.dob = dob
         db.commit()
 
     # 3. Ensure Exam Session
@@ -352,10 +354,9 @@ def import_or_update_live_result(
         )
         verify_and_store_pdf(
             db=db,
-            file_path=pdf_path,
-            student_id=student.id,
-            session_id=exam_session.id,
-            register_number=student.register_number
+            student=student,
+            session=exam_session,
+            pdf_path=pdf_path
         )
     except Exception as e:
         print(f"Error generating marksheet PDF for {reg_no}: {e}")

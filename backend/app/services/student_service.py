@@ -258,6 +258,27 @@ def bulk_create_students(db: Session, students_in: List[StudentCreate]) -> Dict[
         "created_ids": [s.id for s in created_list]
     }
 
+def inject_ignored_errors_to_bytesio(output: io.BytesIO) -> io.BytesIO:
+    """
+    Injects SpreadsheetML <ignoredErrors> elements into the saved in-memory .xlsx ZIP archive
+    to permanently remove Excel's 'Number Stored as Text' green triangle warnings.
+    """
+    import zipfile
+    output.seek(0)
+    new_buf = io.BytesIO()
+    with zipfile.ZipFile(output, "r") as zin, zipfile.ZipFile(new_buf, "w", zipfile.ZIP_DEFLATED) as zout:
+        for item in zin.infolist():
+            data = zin.read(item.filename)
+            if item.filename.startswith("xl/worksheets/sheet") and item.filename.endswith(".xml"):
+                xml_str = data.decode("utf-8")
+                if "</worksheet>" in xml_str and "<ignoredErrors>" not in xml_str:
+                    ignored_block = '<ignoredErrors><ignoredError sqref="A1:C5000" numberStoredAsText="1"/></ignoredErrors></worksheet>'
+                    xml_str = xml_str.replace("</worksheet>", ignored_block)
+                    data = xml_str.encode("utf-8")
+            zout.writestr(item, data)
+    new_buf.seek(0)
+    return new_buf
+
 def generate_roster_template() -> io.BytesIO:
     """
     Generates an official, academic-grade Excel (.xlsx) template for student cohort enrollment.
@@ -361,7 +382,7 @@ def generate_roster_template() -> io.BytesIO:
     output = io.BytesIO()
     wb.save(output)
     output.seek(0)
-    return output
+    return inject_ignored_errors_to_bytesio(output)
 
 def export_students_excel(students: List[Student]) -> io.BytesIO:
     """
@@ -437,4 +458,4 @@ def export_students_excel(students: List[Student]) -> io.BytesIO:
     output = io.BytesIO()
     wb.save(output)
     output.seek(0)
-    return output
+    return inject_ignored_errors_to_bytesio(output)

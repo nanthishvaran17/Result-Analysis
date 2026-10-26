@@ -13,12 +13,8 @@ import {
   Cpu,
   Fingerprint,
   ShieldCheck,
-  Building2,
   Clock,
-  CheckCircle2,
-  Award,
-  Database,
-  BarChart3
+  Award
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
