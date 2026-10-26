@@ -1,0 +1,555 @@
+# MASTER PROMPT — Complete Enterprise Examination Result Automation Platform
+
+## ROLE
+
+Act as a Principal Software Architect, Senior Full-Stack Engineer, Database Architect, Excel Automation Specialist, Cybersecurity Engineer, UI/UX Designer, DevOps Engineer, and QA Automation Lead.
+
+Your task is to audit, improve, complete, and production-harden my existing College Examination Result Automation Platform using the actual frontend, backend, database, business logic, and configuration available in the repository.
+
+This is an implementation task, not a design-only exercise.
+
+**Primary objective:** Deliver a complete, secure, professional, staff-friendly platform that automatically processes authorized examination results, downloads and validates result PDFs, stores verified data, generates advanced Excel reports, and maintains reliable processing history.
+
+Do not use AI or LLMs for academic result interpretation, grade decisions, or deterministic calculations.
+
+---
+
+# PHASE 1 — COMPLETE PROJECT AUDIT
+
+Before modifying anything, inspect the entire repository.
+
+Audit:
+
+- Frontend architecture, pages, routes, components, state management, API integration, and styling.
+- Backend architecture, APIs, services, background workers, and error handling.
+- Database schema, models, migrations, relationships, constraints, and indexes.
+- Authentication, authorization, sessions, and user roles.
+- Existing student registry and Excel import functionality.
+- Existing examination result retrieval and PDF download logic.
+- PDF parsing and subject-result extraction.
+- Academic calculations and historical arrear logic.
+- Excel export, formatting, formulas, and report download endpoints.
+- Existing tests, deployment files, environment configuration, logs, and dependencies.
+
+Identify broken features, duplicated logic, missing validations, security vulnerabilities, performance bottlenecks, and integration problems.
+
+Trace every important workflow from the frontend action to the backend endpoint, database operation, and final output.
+
+Create an implementation plan based on the actual repository. Do not assume the technology stack or invent missing files.
+
+Preserve all working functionality and existing data.
+
+Do not rebuild the application from scratch unless the current architecture genuinely requires it.
+
+---
+
+# PHASE 2 — PROFESSIONAL FRONTEND
+
+Build a premium, enterprise-grade interface for college staff.
+
+## Design system
+
+Use the existing compatible frontend stack. If a redesign is required and the repository supports it, prefer React, TypeScript, Tailwind CSS, and accessible reusable UI components.
+
+Design principles:
+
+- White or light-grey background with deep navy-blue accents.
+- Consistent typography, spacing, borders, and button sizes.
+- Professional enterprise dashboard, not a generic college website.
+- Desktop-first layout with tablet and mobile responsiveness.
+- Clean sidebar navigation and compact top navigation.
+- Minimal, purposeful animations.
+- No unnecessary glassmorphism, excessive blur, gradients, or decorative effects.
+- No AI chatbots or AI-generated result interpretations.
+- Accessible color contrast, keyboard navigation, and readable status labels.
+
+## Required pages
+
+### 1. Authentication
+- Secure staff login.
+- Session handling and logout.
+- Role-aware navigation.
+- Unauthorized-access handling.
+- MFA support if compatible with the existing identity provider.
+
+### 2. Overview Dashboard
+Display actual backend data for:
+
+- Total eligible students.
+- Results retrieved.
+- Results verified.
+- Pending records.
+- Failed records.
+- Missing or ambiguous results.
+- Latest examination session.
+- Recent processing activity.
+- Latest successful Excel export.
+- System health and actionable errors.
+
+Never hardcode dashboard counts.
+
+### 3. Student Registry
+- Student list and details.
+- Search, sorting, filters, and pagination.
+- Excel import with validation.
+- Duplicate Register Number detection.
+- Missing-data identification.
+- Department, batch, and examination-session filters where supported.
+
+### 4. Result Automation Center
+- Examination-session selection.
+- Department and cohort selection.
+- Student selection.
+- Pre-run validation.
+- Start, pause, resume, and cancel controls where supported.
+- Live progress from the backend.
+- Per-student processing status.
+- Failed-record retry.
+- Clear error explanations.
+- Confirmation before destructive actions.
+
+### 5. Result Analysis
+- One student per row.
+- Dynamic subject-code columns.
+- Grade and result-status display.
+- Current-semester arrear analysis.
+- Historical standing-arrear analysis where data is sufficient.
+- Search, filters, sorting, pagination, and export.
+
+### 6. PDF Management
+- Verified PDF availability.
+- Download and processing status.
+- Safe file naming and storage.
+- Authorized PDF access.
+- Download history.
+- Missing-file and failed-download handling.
+
+### 7. Advanced Excel Reports
+- Generate and download validated workbooks.
+- Display report-generation progress.
+- Show export status and errors.
+- Maintain report versions and history.
+- Prevent incomplete reports from replacing the last valid report.
+
+### 8. Processing History and Audit
+- Run history.
+- Per-student processing logs.
+- Download and extraction status.
+- Retry history.
+- Staff activity audit.
+- Sanitized error messages.
+
+### 9. Staff and Settings
+- Admin, authorized exam staff, and read-only viewer roles.
+- Permission management.
+- Secure configuration.
+- Session management.
+- System health and backup status where available.
+
+All pages must use actual APIs and real database data. No fake charts, mock counters, nonfunctional buttons, or simulated successful operations in production.
+
+---
+
+# PHASE 3 — BACKEND AND API ARCHITECTURE
+
+Audit and preserve the existing backend wherever practical.
+
+If a new implementation is necessary, prefer Python with FastAPI for the API layer.
+
+Organize the application into maintainable modules:
+
+- Authentication and authorization.
+- Student management.
+- Examination sessions.
+- Result retrieval.
+- PDF download and extraction.
+- Result validation.
+- Academic calculations.
+- Background processing.
+- Excel generation.
+- Reporting and export.
+- Audit logging.
+- Health checks.
+
+Use a service layer for business logic and keep HTTP route handlers lightweight.
+
+## API requirements
+
+Implement or improve endpoints for:
+
+- Authentication and current-user information.
+- Student listing and import.
+- Examination-session management.
+- Automation-run creation and status.
+- Pause, resume, cancellation, and retry where supported.
+- Result listing and verification.
+- PDF retrieval and authorized download.
+- Excel report generation and download.
+- Processing history.
+- Audit events.
+- Health and readiness checks.
+
+Reuse existing endpoints when suitable. Do not introduce duplicate APIs unnecessarily.
+
+Validate inputs and outputs with appropriate schemas.
+
+Use correct HTTP status codes, consistent error responses, pagination, request limits, and authorization checks.
+
+Long-running tasks must execute in an appropriate background worker rather than blocking normal API requests.
+
+For live progress, use the existing supported polling or WebSocket architecture.
+
+Never report a job as completed until the relevant processing and persistence steps have actually succeeded.
+
+---
+
+# PHASE 4 — DATABASE AND DATA INTEGRITY
+
+Use the existing database unless a migration is necessary and explicitly justified.
+
+Audit and improve:
+
+- Student records.
+- Examination sessions and semesters.
+- Subject definitions.
+- Student subject results.
+- Result verification status.
+- Processing jobs.
+- PDF metadata and storage references.
+- Export history.
+- Staff permissions.
+- Audit logs.
+
+Use proper foreign keys, unique constraints, indexes, transactions, and migrations.
+
+Prevent duplicate results using appropriate unique keys based on the institution's actual data model.
+
+Use idempotent processing: retrying a job must not create duplicate results or corrupt existing data.
+
+Keep database updates atomic wherever practical.
+
+Store normalized subject results rather than relying on fixed subject-specific database columns.
+
+Preserve historical examination records and associate each result with the correct student, subject, semester, and examination session.
+
+Never overwrite verified results with incomplete or invalid data.
+
+Do not erase existing data, reset production databases, or run destructive migrations without explicit authorization and a verified recovery plan.
+
+---
+
+# PHASE 5 — AUTHORIZED RESULT AUTOMATION
+
+Implement a reliable workflow for retrieving examination results through an officially permitted portal integration or authorized export mechanism.
+
+Where automated browser interaction is permitted, use an appropriate tool such as Playwright.
+
+## Processing workflow
+
+1. Load eligible student records.
+2. Validate Register Numbers and required input fields.
+3. Establish the correct examination session.
+4. Retrieve results through the approved mechanism.
+5. Download the corresponding PDF where permitted.
+6. Verify file integrity and student identity.
+7. Extract subject codes, grades, and other supported result data.
+8. Validate the extracted information.
+9. Persist verified results transactionally.
+10. Record processing status and sanitized errors.
+11. Generate updated reports after successful validation.
+
+Use Register Numbers as identifiers. If DOB is required by the official portal, handle it securely and avoid storing it unnecessarily.
+
+Do not bypass CAPTCHA, MFA, rate limits, access controls, or other portal protections.
+
+If additional human verification is required, pause the affected workflow and request staff intervention.
+
+## Reliability
+
+- Retry only transient errors.
+- Apply sensible timeouts and backoff.
+- Prevent concurrent duplicate processing.
+- Support recovery after a worker restart.
+- Preserve the last valid snapshot or result.
+- Distinguish pending, failed, unavailable, and verified states.
+- Continue processing independent records when one student fails.
+- Record meaningful error details without exposing sensitive information.
+
+---
+
+# PHASE 6 — PDF EXTRACTION AND VERIFICATION
+
+Use a suitable existing PDF library or a compatible library such as PyMuPDF or pdfplumber.
+
+Support the actual PDF structure encountered in the authorized source.
+
+Validate:
+
+- Register Number.
+- Examination session and semester.
+- Subject code.
+- Subject name when available.
+- Grade or result status.
+- Required record completeness.
+- Duplicate and conflicting subject entries.
+
+Do not assume all PDFs use identical layouts.
+
+If the PDF is scanned or unreadable, flag it for manual review unless an approved OCR workflow exists.
+
+Never silently convert extraction uncertainty into a pass, fail, or arrear decision.
+
+Store the source PDF reference and verification metadata where appropriate.
+
+---
+
+# PHASE 7 — ADVANCED ENTERPRISE EXCEL ENGINE
+
+Implement a reusable workbook-generation service using openpyxl or the project's existing compatible library.
+
+## Required worksheets
+
+1. Result Analysis.
+2. Summary.
+3. Arrear Analysis.
+4. Processing Log.
+5. Subject Mapping.
+
+Generate only the sheets relevant to available data and established requirements.
+
+## Dynamic result matrix
+
+- One student per row.
+- Unique subject codes become columns dynamically.
+- Subject ordering remains deterministic.
+- Results map to the correct student and subject.
+- Register Numbers remain text identifiers.
+- Student rows follow the institution's required ascending order.
+- New semesters and subjects do not require hardcoded code changes.
+
+## Professional formatting
+
+Apply consistent formatting across all applicable worksheets:
+
+- Professional institutional title and report metadata.
+- Dark navy headers with readable white text.
+- Appropriate fonts, font sizes, bold styling, and fills.
+- Complete, consistent table borders.
+- Sensible alternating row colors.
+- Correct horizontal and vertical alignment.
+- Dynamic column widths and row heights.
+- Wrapped headers for long subject descriptions.
+- Appropriate number and date formats.
+- Freeze panes.
+- AutoFilter or Excel Tables.
+- Conditional formatting for validated academic and processing statuses.
+- Clear totals and summary sections.
+- Print areas, margins, page orientation, and repeated header rows.
+
+Avoid merged cells inside the main data table.
+
+## Formulas and calculations
+
+Use formulas only where appropriate and based on verified rules.
+
+Support relevant totals, percentages, grade distributions, and arrear counts.
+
+- Avoid fixed ranges that exclude new students.
+- Prevent division-by-zero errors.
+- Do not treat missing results as arrears.
+- Keep processing status separate from academic status.
+- Protect against formula injection from untrusted source text.
+- Set recalculation properties where supported.
+- Independently verify important calculations in the backend.
+
+If formula values have not been calculated by a spreadsheet engine, disclose that limitation instead of claiming the cached results are current.
+
+## Workbook verification
+
+After generation, reopen and validate the workbook.
+
+Check:
+
+- Worksheet names and order.
+- Student and subject counts.
+- Formula references.
+- Table ranges.
+- Borders, alignment, fills, and number formats.
+- Freeze panes and filters.
+- Conditional formatting.
+- Print configuration.
+- File readability and structural integrity.
+
+Publish the workbook only after validation succeeds.
+
+If generation fails, preserve the last valid report.
+
+---
+
+# PHASE 8 — SECURITY AND PRIVACY
+
+Apply defense in depth.
+
+- Authentication and server-side authorization.
+- Role-based access control.
+- Least-privilege database permissions.
+- HTTPS and secure session handling.
+- Safe CORS configuration.
+- Input validation and output encoding.
+- Protection against SQL injection and path traversal.
+- Safe PDF and Excel storage.
+- Restricted download access.
+- Rate limiting where appropriate.
+- Secure secret management.
+- Sanitized application logs.
+- Dependency and configuration checks.
+- Backup and recovery procedures.
+- Audit trails for sensitive actions.
+- Appropriate retention and deletion policies.
+
+Do not store raw DOBs, passwords, tokens, or unnecessary student information in logs or reports.
+
+Use OWASP ASVS as a security verification reference.
+
+Never expose student data through public endpoints, debug output, or unrestricted file URLs.
+
+---
+
+# PHASE 9 — PERFORMANCE AND SCALABILITY
+
+Optimize the existing architecture before adding complexity.
+
+- Use efficient database queries and indexes.
+- Avoid N+1 queries.
+- Apply server-side pagination to large datasets.
+- Use background jobs for PDF processing and large exports.
+- Batch database writes when safe.
+- Limit concurrency to respect portal policies and system resources.
+- Avoid repeated downloads of already verified results.
+- Track progress at job and record level.
+- Avoid excessive Excel style creation.
+- Prevent slow exports from blocking unrelated requests.
+- Measure performance with representative synthetic datasets.
+
+Introduce additional infrastructure only when it is justified by the actual workload.
+
+---
+
+# PHASE 10 — TESTING AND QUALITY ASSURANCE
+
+Audit and extend the existing test suite.
+
+Implement unit, integration, regression, security, and performance tests for:
+
+- Authentication and permissions.
+- Student import and duplicate detection.
+- Examination-session isolation.
+- Result retrieval and PDF download failures.
+- PDF extraction and malformed documents.
+- Correct subject mapping.
+- Current-semester and historical arrear calculations.
+- Idempotent retries.
+- Concurrent job handling.
+- Database transaction rollback.
+- Excel formatting and formulas.
+- Formula-injection protection.
+- Missing and ambiguous records.
+- Large exports.
+- Failed export recovery.
+- Unauthorized downloads.
+- Existing frontend and API functionality.
+
+Use synthetic test records rather than real student DOBs or credentials.
+
+Run the actual relevant tests and report the exact outcomes.
+
+Do not claim full test coverage or production readiness without evidence.
+
+---
+
+# PHASE 11 — DEPLOYMENT AND OPERATIONS
+
+Audit existing deployment configuration before making changes.
+
+Where appropriate, ensure:
+
+- Reproducible dependency installation.
+- Environment-based configuration.
+- Secure production secrets.
+- Database migrations.
+- Health and readiness endpoints.
+- Persistent storage for required artifacts.
+- Worker lifecycle management.
+- Structured, sanitized logging.
+- Database backups and restore verification.
+- Safe deployment and rollback procedures.
+- Correct production API URLs.
+- No accidental localhost dependencies.
+- No secrets committed to source control.
+
+Preserve the current working deployment unless a migration is necessary and safely planned.
+
+Never run destructive production operations without explicit approval.
+
+---
+
+# PHASE 12 — IMPLEMENTATION RULES
+
+Follow these non-negotiable rules:
+
+1. Audit before editing.
+2. Understand dependencies before changing interfaces.
+3. Reuse existing working code.
+4. Preserve existing student and result data.
+5. Do not invent academic rules or data.
+6. Do not hardcode production counts or sample results.
+7. Do not create fake functionality.
+8. Do not remove security checks to make tests pass.
+9. Do not replace real backend integration with frontend-only mockups.
+10. Do not claim tests passed unless they were executed.
+11. Do not introduce unnecessary frameworks or infrastructure.
+12. Keep changes modular, documented, and maintainable.
+13. Review diffs and run regression tests after implementation.
+14. Identify any operation that requires human approval before executing it.
+
+If required configuration, official portal access, or academic rules are unavailable, implement the supported parts and clearly document the unresolved dependency. Do not fabricate a successful integration.
+
+---
+
+# FINAL ACCEPTANCE CRITERIA
+
+The project is ready for final review only when:
+
+- All existing frontend and backend workflows have been audited.
+- The staff interface uses real backend data.
+- Authentication and authorization are enforced.
+- Database records remain consistent and recoverable.
+- Authorized result retrieval and PDF processing work.
+- Failed jobs can be retried safely.
+- Verified results are stored without duplication.
+- Subject columns are generated dynamically.
+- Excel reports are professionally formatted and validated.
+- Academic calculations follow confirmed institutional rules.
+- Sensitive information is protected.
+- Existing features remain functional.
+- Automated test results are reported accurately.
+- Deployment changes and remaining risks are documented.
+
+# FINAL DELIVERABLE
+
+After implementation, provide a concise engineering report containing:
+
+1. Original issues discovered.
+2. Architecture and workflow improvements.
+3. Frontend pages and features implemented.
+4. Backend APIs and services changed.
+5. Database models, migrations, and integrity improvements.
+6. PDF processing and automation changes.
+7. Excel worksheets, formatting, and formula validation.
+8. Security and performance improvements.
+9. Exact files modified.
+10. Tests executed and actual pass/fail counts.
+11. Deployment steps and rollback considerations.
+12. Remaining limitations and required human actions.
+
+Start with the real repository audit, then implement, test, verify, and report. Deliver working functionality rather than merely describing what should be built.

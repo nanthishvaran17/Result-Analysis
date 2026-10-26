@@ -1,0 +1,19 @@
+# Node.js
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.env
+backend/exam_results.db*
+backend/storage/uploads/*
+.pytest_cache/
+*.log
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
