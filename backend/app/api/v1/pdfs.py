@@ -8,6 +8,8 @@ from app.core.database import get_db
 from app.core.config import settings
 from app.models.pdf_record import ResultPdf
 from app.models.student import Student
+from app.models.session import ExamSession
+from app.models.result import StudentResult, SubjectResult
 from app.services.audit_service import log_audit
 from app.api.deps import get_current_user
 from app.models.user import User
