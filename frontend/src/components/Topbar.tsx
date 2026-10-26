@@ -1,5 +1,5 @@
 import React from 'react';
-import { LogOut, RefreshCw, Shield, FileSpreadsheet } from 'lucide-react';
+import { LogOut, RefreshCw, Shield, FileSpreadsheet, Search } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import type { ExamSession } from '../types';
@@ -11,6 +11,7 @@ interface TopbarProps {
   onSelectSession: (id: number) => void;
   onRefresh: () => void;
   isRefreshing?: boolean;
+  onOpenSearch?: () => void;
 }
 
 export const Topbar: React.FC<TopbarProps> = ({
@@ -20,6 +21,7 @@ export const Topbar: React.FC<TopbarProps> = ({
   onSelectSession,
   onRefresh,
   isRefreshing,
+  onOpenSearch,
 }) => {
   const { user, logout } = useAuth();
   const { success } = useToast();
@@ -69,6 +71,20 @@ export const Topbar: React.FC<TopbarProps> = ({
 
       {/* Right Controls */}
       <div className="flex items-center gap-3">
+        {/* Global Spotlight Search Trigger */}
+        {onOpenSearch && (
+          <button
+            onClick={onOpenSearch}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+          >
+            <Search className="w-3.5 h-3.5 text-blue-600" />
+            <span className="hidden sm:inline">Search...</span>
+            <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 rounded-md bg-white border border-slate-200 text-[10px] font-mono font-bold text-slate-500">
+              ⌘K
+            </kbd>
+          </button>
+        )}
+
         {/* Quick Download Excel Template */}
         <button
           onClick={handleDownloadTemplate}

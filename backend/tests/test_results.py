@@ -1,6 +1,9 @@
 import pytest
 from app.core.database import SessionLocal
-from app.services.result_service import calculate_gpa_and_status, get_result_matrix
+from app.services.result_service import (
+    calculate_gpa_and_status, get_result_matrix,
+    get_rank_and_remedial_analytics, get_subject_performance_analytics
+)
 
 def test_deterministic_academic_calculations():
     # Student with all passes: O (10), A+ (9), A (8)
@@ -44,3 +47,35 @@ def test_result_matrix_generation():
         assert matrix.pass_percentage >= 0.0
     finally:
         db.close()
+
+def test_rank_and_remedial_analytics():
+    db = SessionLocal()
+    try:
+        analytics = get_rank_and_remedial_analytics(db, session_id=1, department_code="CSE")
+        assert analytics.session_code == "NOV_DEC_2025"
+        assert analytics.total_appeared >= 10
+        # Toppers must be sorted descending by GPA with 0 arrears
+        if analytics.toppers:
+            assert analytics.toppers[0].rank == 1
+            if len(analytics.toppers) > 1:
+                assert analytics.toppers[0].gpa >= analytics.toppers[1].gpa
+        # At-risk list must have arrears count > 0 or GPA < 6.0
+        for st in analytics.at_risk:
+            assert (st.arrears_count > 0) or (st.standing_arrears_count > 0) or (st.gpa < 6.0)
+    finally:
+        db.close()
+
+def test_subject_performance_analytics():
+    db = SessionLocal()
+    try:
+        sub_perf = get_subject_performance_analytics(db, session_id=1, department_code="CSE")
+        assert sub_perf.session_code == "NOV_DEC_2025"
+        assert len(sub_perf.subjects) > 0
+        for s in sub_perf.subjects:
+            assert s.appeared >= 0
+            assert s.passed + s.failed == s.appeared
+            assert s.performance_level in ["HIGH", "AVERAGE", "LOW"]
+            assert 0.0 <= s.pass_percentage <= 100.0
+    finally:
+        db.close()
+

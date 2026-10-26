@@ -10,6 +10,8 @@ __pycache__/
 *.env
 backend/exam_results.db*
 backend/storage/uploads/*
+backend/storage/reports/*.xlsx
+backend/storage/pdfs/*.pdf
 .pytest_cache/
 *.log
 

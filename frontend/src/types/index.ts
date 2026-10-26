@@ -191,3 +191,60 @@ export interface DashboardStats {
     reports_storage_dir: string;
   };
 }
+
+export interface RankHolderItem {
+  rank: number;
+  student_id: number;
+  register_number: string;
+  student_name: string;
+  department_code: string;
+  batch: string;
+  semester: number;
+  gpa: number;
+  earned_credits: number;
+}
+
+export interface AtRiskStudentItem {
+  student_id: number;
+  register_number: string;
+  student_name: string;
+  department_code: string;
+  batch: string;
+  semester: number;
+  gpa: number;
+  arrears_count: number;
+  standing_arrears_count: number;
+  failed_subjects: string[];
+}
+
+export interface RankAndRemedialData {
+  session_code: string;
+  department_code?: string;
+  semester?: number;
+  toppers: RankHolderItem[];
+  at_risk: AtRiskStudentItem[];
+  total_appeared: number;
+  total_passed: number;
+  total_at_risk: number;
+}
+
+export interface SubjectPerformanceItem {
+  subject_code: string;
+  subject_name: string;
+  credits: number;
+  appeared: number;
+  passed: number;
+  failed: number;
+  pass_percentage: number;
+  grades_count: Record<string, number>;
+  performance_level: 'HIGH' | 'AVERAGE' | 'LOW';
+}
+
+export interface SubjectPerformanceData {
+  session_code: string;
+  department_code?: string;
+  semester?: number;
+  subjects: SubjectPerformanceItem[];
+  overall_pass_percentage: number;
+}
+

@@ -67,3 +67,55 @@ class ResultMatrixResponse(BaseModel):
     failed_students: int
     pass_percentage: float
     average_gpa: float
+
+class RankHolderItem(BaseModel):
+    rank: int
+    student_id: int
+    register_number: str
+    student_name: str
+    department_code: str
+    batch: str
+    semester: int
+    gpa: float
+    earned_credits: int
+
+class AtRiskStudentItem(BaseModel):
+    student_id: int
+    register_number: str
+    student_name: str
+    department_code: str
+    batch: str
+    semester: int
+    gpa: float
+    arrears_count: int
+    standing_arrears_count: int
+    failed_subjects: List[str]
+
+class RankAndRemedialResponse(BaseModel):
+    session_code: str
+    department_code: Optional[str] = None
+    semester: Optional[int] = None
+    toppers: List[RankHolderItem]
+    at_risk: List[AtRiskStudentItem]
+    total_appeared: int
+    total_passed: int
+    total_at_risk: int
+
+class SubjectPerformanceItem(BaseModel):
+    subject_code: str
+    subject_name: str
+    credits: int
+    appeared: int
+    passed: int
+    failed: int
+    pass_percentage: float
+    grades_count: Dict[str, int]
+    performance_level: str  # HIGH (>=85%), AVERAGE (70-84%), LOW (<70%)
+
+class SubjectPerformanceResponse(BaseModel):
+    session_code: str
+    department_code: Optional[str] = None
+    semester: Optional[int] = None
+    subjects: List[SubjectPerformanceItem]
+    overall_pass_percentage: float
+

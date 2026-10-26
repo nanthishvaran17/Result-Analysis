@@ -10,6 +10,7 @@ import { PdfManagement } from './pages/PdfManagement';
 import { AdvancedExcelReports } from './pages/AdvancedExcelReports';
 import { ProcessingHistoryAudit } from './pages/ProcessingHistoryAudit';
 import { StaffSettings } from './pages/StaffSettings';
+import { DossierProvider } from './context/DossierContext';
 
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
@@ -42,27 +43,29 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <Layout
-      currentTab={currentTab}
-      onSelectTab={setCurrentTab}
-      activeSessionId={activeSessionId}
-      setActiveSessionId={setActiveSessionId}
-      onRefresh={handleRefresh}
-      isRefreshing={isRefreshing}
-    >
-      <div key={refreshKey}>
-        {currentTab === 'dashboard' && <OverviewDashboard onNavigateTab={setCurrentTab} />}
-        {currentTab === 'students' && <StudentRegistry />}
-        {currentTab === 'automation' && <ResultAutomationCenter activeSessionId={activeSessionId} />}
-        {currentTab === 'results' && (
-          <ResultAnalysis activeSessionId={activeSessionId} onNavigateTab={setCurrentTab} />
-        )}
-        {currentTab === 'pdfs' && <PdfManagement />}
-        {currentTab === 'reports' && <AdvancedExcelReports activeSessionId={activeSessionId} />}
-        {currentTab === 'audit' && <ProcessingHistoryAudit />}
-        {currentTab === 'settings' && <StaffSettings />}
-      </div>
-    </Layout>
+    <DossierProvider onNavigateTab={setCurrentTab}>
+      <Layout
+        currentTab={currentTab}
+        onSelectTab={setCurrentTab}
+        activeSessionId={activeSessionId}
+        setActiveSessionId={setActiveSessionId}
+        onRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
+      >
+        <div key={refreshKey}>
+          {currentTab === 'dashboard' && <OverviewDashboard onNavigateTab={setCurrentTab} />}
+          {currentTab === 'students' && <StudentRegistry />}
+          {currentTab === 'automation' && <ResultAutomationCenter activeSessionId={activeSessionId} />}
+          {currentTab === 'results' && (
+            <ResultAnalysis activeSessionId={activeSessionId} onNavigateTab={setCurrentTab} />
+          )}
+          {currentTab === 'pdfs' && <PdfManagement />}
+          {currentTab === 'reports' && <AdvancedExcelReports activeSessionId={activeSessionId} />}
+          {currentTab === 'audit' && <ProcessingHistoryAudit />}
+          {currentTab === 'settings' && <StaffSettings />}
+        </div>
+      </Layout>
+    </DossierProvider>
   );
 };
 

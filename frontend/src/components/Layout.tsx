@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
+import { useDossier } from '../context/DossierContext';
 import { api } from '../api/client';
 import type { ExamSession } from '../types';
 
@@ -48,6 +49,8 @@ export const Layout: React.FC<LayoutProps> = ({
     settings: 'Staff & Security Settings',
   };
 
+  const { openSearch } = useDossier();
+
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
       <Sidebar currentTab={currentTab} onSelectTab={onSelectTab} />
@@ -59,6 +62,7 @@ export const Layout: React.FC<LayoutProps> = ({
           onSelectSession={setActiveSessionId}
           onRefresh={onRefresh}
           isRefreshing={isRefreshing}
+          onOpenSearch={openSearch}
         />
         <main className="flex-1 overflow-y-auto">
           {children}
