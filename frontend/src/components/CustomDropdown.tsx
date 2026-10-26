@@ -18,6 +18,7 @@ interface CustomDropdownProps {
   placeholder?: string;
   className?: string;
   minWidth?: string;
+  size?: 'sm' | 'md' | 'lg';
 }
 
 export const CustomDropdown: React.FC<CustomDropdownProps> = ({
@@ -29,6 +30,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
   placeholder = 'Select option...',
   className = '',
   minWidth = 'min-w-[200px]',
+  size = 'md',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -61,13 +63,20 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
 
   const selectedOption = options.find((opt) => opt.value === value);
 
+  const paddingClasses =
+    size === 'sm'
+      ? 'px-2.5 py-1.5 text-xs'
+      : size === 'lg'
+      ? 'px-4 py-2.5 text-sm'
+      : 'px-3 py-2 text-xs';
+
   return (
     <div className={`relative ${className}`} ref={containerRef}>
       {/* Trigger Button */}
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`w-full flex items-center justify-between gap-2.5 px-3 py-2 bg-white hover:bg-slate-50 border rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer ${
+        className={`w-full flex items-center justify-between gap-2 bg-white hover:bg-slate-50 border rounded-xl font-semibold shadow-2xs transition-all cursor-pointer ${paddingClasses} ${
           isOpen
             ? 'border-blue-600 ring-2 ring-blue-100 bg-blue-50/20'
             : 'border-slate-200/90 text-slate-800 hover:border-slate-300'

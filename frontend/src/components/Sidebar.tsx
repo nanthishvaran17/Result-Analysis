@@ -131,6 +131,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onSig
           </div>
           {onSignOut && (
             <button
+              id="sidebar-signout-btn"
               onClick={onSignOut}
               title="Sign Out"
               className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all cursor-pointer"

@@ -101,6 +101,7 @@ export const Layout: React.FC<LayoutProps> = ({
 
           <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
             <button
+              id="cancel-signout-btn"
               type="button"
               onClick={() => setShowLogoutModal(false)}
               className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
@@ -108,6 +109,7 @@ export const Layout: React.FC<LayoutProps> = ({
               Cancel
             </button>
             <button
+              id="confirm-signout-btn"
               type="button"
               onClick={() => {
                 setShowLogoutModal(false);

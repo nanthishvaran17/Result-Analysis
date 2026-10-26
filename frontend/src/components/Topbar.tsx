@@ -1,6 +1,7 @@
 import React from 'react';
-import { LogOut, RefreshCw, Shield, Search } from 'lucide-react';
+import { LogOut, RefreshCw, Shield, Search, Calendar } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { CustomDropdown } from './CustomDropdown';
 import type { ExamSession } from '../types';
 
 interface TopbarProps {
@@ -56,20 +57,20 @@ export const Topbar: React.FC<TopbarProps> = ({
         )}
 
         {/* Examination Session Selector */}
-        <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs shadow-2xs">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span className="text-slate-500 font-medium hidden sm:inline">Session:</span>
-          <select
-            className="bg-transparent text-slate-800 font-bold focus:outline-hidden cursor-pointer"
+        <div className="w-56">
+          <CustomDropdown
             value={activeSessionId || ''}
-            onChange={(e) => onSelectSession(Number(e.target.value))}
-          >
-            {sessions.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.session_code} {s.is_active ? 'Current' : ''}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => onSelectSession(Number(val))}
+            options={sessions.map((s) => ({
+              value: s.id,
+              label: s.session_code,
+              badge: s.is_active ? 'Active' : undefined,
+              sublabel: s.session_name || undefined,
+            }))}
+            size="sm"
+            icon={Calendar}
+            placeholder="Select Session"
+          />
         </div>
 
         {/* Refresh Button */}
@@ -90,6 +91,7 @@ export const Topbar: React.FC<TopbarProps> = ({
 
         {/* Sign Out Button */}
         <button
+          id="topbar-signout-btn"
           onClick={onRequestSignOut || logout}
           className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-xl border border-rose-200 transition-all cursor-pointer shadow-2xs active:scale-95"
           title="Sign out of portal"

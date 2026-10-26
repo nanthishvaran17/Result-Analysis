@@ -24,9 +24,8 @@ NAVY_HEADER = "0F172A"       # Deep Slate 900
 NAVY_SUBHEADER = "1E293B"    # Slate 800
 ACCENT_BLUE = "2563EB"       # Royal Blue
 ZEBRA_ROW = "F8FAFC"         # Clean Light Grey / Slate 50
-CARD_BG = "F1F5F9"           # Slate 100
-BORDER_COLOR = "94A3B8"      # Slate 400 (crisp high-contrast border)
-BORDER_DARK = "64748B"       # Slate 500
+BORDER_COLOR = "000000"      # Standard crisp black border (True All Borders)
+BORDER_DARK = "000000"
 
 PASS_FILL = "DCFCE7"         # Green 100
 PASS_FONT = "15803D"         # Green 700
@@ -178,7 +177,7 @@ def apply_conditional_formatting_rules(ws, start_row: int, end_row: int, start_c
         formula=['"PASS"'],
         stopIfTrue=False,
         fill=PatternFill(start_color=PASS_FILL, end_color=PASS_FILL, fill_type="solid"),
-        font=Font(name="Calibri", size=10, bold=True, color=PASS_FONT)
+        font=Font(name="Times New Roman", size=10, bold=True, color=PASS_FONT)
     )
     ws.conditional_formatting.add(cell_range, pass_rule)
 
@@ -188,7 +187,7 @@ def apply_conditional_formatting_rules(ws, start_row: int, end_row: int, start_c
         formula=['"FAIL"'],
         stopIfTrue=False,
         fill=PatternFill(start_color=FAIL_FILL, end_color=FAIL_FILL, fill_type="solid"),
-        font=Font(name="Calibri", size=10, bold=True, color=FAIL_FONT)
+        font=Font(name="Times New Roman", size=10, bold=True, color=FAIL_FONT)
     )
     ws.conditional_formatting.add(cell_range, fail_rule)
 
@@ -199,7 +198,7 @@ def apply_conditional_formatting_rules(ws, start_row: int, end_row: int, start_c
             formula=[f'"{ar_grade}"'],
             stopIfTrue=False,
             fill=PatternFill(start_color=FAIL_FILL, end_color=FAIL_FILL, fill_type="solid"),
-            font=Font(name="Calibri", size=10, bold=True, color=FAIL_FONT)
+            font=Font(name="Times New Roman", size=10, bold=True, color=FAIL_FONT)
         )
         ws.conditional_formatting.add(cell_range, ar_rule)
 
@@ -210,7 +209,7 @@ def apply_conditional_formatting_rules(ws, start_row: int, end_row: int, start_c
             formula=[f'"{p_grade}"'],
             stopIfTrue=False,
             fill=PatternFill(start_color=PASS_FILL, end_color=PASS_FILL, fill_type="solid"),
-            font=Font(name="Calibri", size=10, bold=True, color=PASS_FONT)
+            font=Font(name="Times New Roman", size=10, bold=True, color=PASS_FONT)
         )
         ws.conditional_formatting.add(cell_range, p_rule)
 
