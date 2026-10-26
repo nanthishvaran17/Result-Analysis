@@ -322,9 +322,9 @@ def generate_roster_template() -> io.BytesIO:
 
     # Sample Guidance Rows
     samples = [
-        ("710022104051", "Aravindhan M", "CSE", "2022-2026", 5, "A", "710022104051@college.edu"),
-        ("710022104052", "Bhavani S", "CSE", "2022-2026", 5, "B", "710022104052@college.edu"),
-        ("710022106001", "Chandran P", "ECE", "2023-2027", 3, "A", "710022106001@college.edu"),
+        (710022104051, "Aravindhan M", "CSE", "2022-2026", 5, "A", "710022104051@college.edu"),
+        (710022104052, "Bhavani S", "CSE", "2022-2026", 5, "B", "710022104052@college.edu"),
+        (710022106001, "Chandran P", "ECE", "2023-2027", 3, "A", "710022106001@college.edu"),
     ]
 
     for r_idx, row_vals in enumerate(samples, 4):
@@ -333,6 +333,8 @@ def generate_roster_template() -> io.BytesIO:
             cell.font = font_row
             cell.fill = fill_white
             cell.border = all_border
+            if c_idx == 1 and isinstance(val, int):
+                cell.number_format = "0"
             cell.alignment = Alignment(horizontal="center" if c_idx in [1, 3, 4, 5, 6] else "left", vertical="center")
 
     # Pre-format entry rows 7 to 35 with all borders and Times New Roman
@@ -411,12 +413,16 @@ def export_students_excel(students: List[Student]) -> io.BytesIO:
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
     for r_idx, s in enumerate(students, 3):
-        vals = [s.register_number, s.name, s.department_code, s.batch, s.current_semester, s.section, s.email or ""]
+        reg_str = str(s.register_number).strip()
+        reg_val = int(reg_str) if reg_str.isdigit() and not reg_str.startswith("0") else reg_str
+        vals = [reg_val, s.name, s.department_code, s.batch, s.current_semester, s.section, s.email or ""]
         for c_idx, val in enumerate(vals, 1):
             cell = ws.cell(row=r_idx, column=c_idx, value=val)
             cell.font = font_row
             cell.fill = fill_white
             cell.border = all_border
+            if c_idx == 1 and isinstance(val, int):
+                cell.number_format = "0"
             cell.alignment = Alignment(horizontal="center" if c_idx in [1, 3, 4, 5, 6] else "left", vertical="center")
 
     col_widths = [20, 28, 16, 16, 14, 12, 32]

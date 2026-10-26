@@ -297,12 +297,8 @@ def build_result_analysis_sheet(ws, matrix):
         cell_sno.alignment = align_center
         cell_sno.font = font_data
 
-        reg_str = str(student.register_number).strip()
-        if reg_str.isdigit() and not reg_str.startswith("0"):
-            reg_cell = ws.cell(row=r, column=2, value=int(reg_str))
-            reg_cell.number_format = "0"
-        else:
-            reg_cell = ws.cell(row=r, column=2, value=reg_str)
+        reg_cell = ws.cell(row=r, column=2, value=str(student.register_number).strip())
+        reg_cell.number_format = "@"
         reg_cell.alignment = align_center
         reg_cell.font = font_data
 
