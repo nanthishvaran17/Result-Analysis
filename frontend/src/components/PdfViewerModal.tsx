@@ -24,6 +24,7 @@ interface MarksheetDetails {
   courses: CourseItem[];
   gpa: number;
   result_status: string;
+  verification_hash?: string;
 }
 
 interface PdfViewerModalProps {

@@ -10,7 +10,6 @@ import {
   ChevronRight,
   AlertCircle,
   KeyRound,
-  CheckCircle2,
   X,
   Shield,
   FileSpreadsheet,

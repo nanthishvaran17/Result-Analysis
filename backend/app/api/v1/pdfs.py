@@ -209,5 +209,6 @@ def get_marksheet_details(
         "academic_year": sess.academic_year if sess else "2025-2026",
         "courses": courses,
         "gpa": res.gpa if res else 0.0,
-        "result_status": res.result_status if res else "PASS"
+        "result_status": res.result_status if res else "PASS",
+        "verification_hash": hashlib.sha256(student.register_number.encode()).hexdigest()[:16].upper()
     }
