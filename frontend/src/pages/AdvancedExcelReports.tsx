@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   AlertTriangle,
   Layers,
-  Sparkles,
   Building2,
   Calendar,
   GraduationCap,
@@ -138,7 +137,7 @@ export const AdvancedExcelReports: React.FC<AdvancedExcelReportsProps> = ({ acti
             <span>Generate Multi-Sheet Excel Workbook</span>
           </div>
           <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5" />
+            <FileSpreadsheet className="w-3.5 h-3.5" />
             <span>Formula-Calculated Official Ledger</span>
           </span>
         </div>

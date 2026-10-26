@@ -7,7 +7,7 @@ import {
   Layers,
   ArrowRight,
   X,
-  Sparkles,
+  PlayCircle,
   Command
 } from 'lucide-react';
 import { api } from '../api/client';
@@ -65,7 +65,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   const quickNav = [
     { title: 'Overview Dashboard', tab: 'dashboard', icon: BarChart3, desc: 'Live candidate & session statistics' },
     { title: 'Dynamic Result Matrix', tab: 'results', icon: Layers, desc: 'Subject-by-subject grades & GPA' },
-    { title: 'Automation Center', tab: 'automation', icon: Sparkles, desc: 'Run portal scraping & batch verification' },
+    { title: 'Automation Center', tab: 'automation', icon: PlayCircle, desc: 'Live portal sync & batch verification' },
     { title: 'Enterprise Excel Reports', tab: 'reports', icon: FileSpreadsheet, desc: '5-sheet validated workbooks' },
     { title: 'Verified Marksheets', tab: 'pdfs', icon: FileText, desc: 'Preview and download marksheet PDFs' },
   ];

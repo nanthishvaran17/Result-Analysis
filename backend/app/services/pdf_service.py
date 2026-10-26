@@ -46,20 +46,47 @@ def generate_marksheet_pdf(
         bottomMargin=36
     )
 
+    doc = SimpleDocTemplate(
+        output_path,
+        pagesize=letter,
+        rightMargin=36,
+        leftMargin=36,
+        topMargin=32,
+        bottomMargin=32
+    )
+
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle(
         'DocTitle',
         parent=styles['Heading1'],
-        fontName='Helvetica-Bold',
-        fontSize=16,
-        leading=20,
+        fontName='Times-Bold',
+        fontSize=15,
+        leading=18,
         textColor=colors.HexColor('#0F172A'),
         alignment=1  # Center
+    )
+    inst_sub_style = ParagraphStyle(
+        'InstSub',
+        parent=styles['Normal'],
+        fontName='Times-Italic',
+        fontSize=8.5,
+        leading=11,
+        textColor=colors.HexColor('#334155'),
+        alignment=1
+    )
+    inst_address_style = ParagraphStyle(
+        'InstAddress',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=8,
+        leading=10,
+        textColor=colors.HexColor('#64748B'),
+        alignment=1
     )
     subtitle_style = ParagraphStyle(
         'DocSubTitle',
         parent=styles['Normal'],
-        fontName='Helvetica-Bold',
+        fontName='Times-Bold',
         fontSize=11,
         leading=14,
         textColor=colors.HexColor('#1E3A8A'),
@@ -68,37 +95,79 @@ def generate_marksheet_pdf(
     subtext_style = ParagraphStyle(
         'DocSubText',
         parent=styles['Normal'],
-        fontName='Helvetica',
-        fontSize=9,
+        fontName='Times-Bold',
+        fontSize=9.5,
         leading=12,
-        textColor=colors.HexColor('#475569'),
+        textColor=colors.HexColor('#0F172A'),
         alignment=1
     )
     cell_style = ParagraphStyle(
         'CellText',
         parent=styles['Normal'],
-        fontName='Helvetica',
+        fontName='Times-Roman',
         fontSize=9,
         leading=11
+    )
+    cell_center_style = ParagraphStyle(
+        'CellCenterText',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=9,
+        leading=11,
+        alignment=1
     )
     header_cell_style = ParagraphStyle(
         'HeaderCellText',
         parent=styles['Normal'],
-        fontName='Helvetica-Bold',
+        fontName='Times-Bold',
+        fontSize=9,
+        leading=11,
+        textColor=colors.white,
+        alignment=1
+    )
+    header_left_style = ParagraphStyle(
+        'HeaderLeftText',
+        parent=styles['Normal'],
+        fontName='Times-Bold',
         fontSize=9,
         leading=11,
         textColor=colors.white
     )
+    disclaimer_style = ParagraphStyle(
+        'DisclaimerText',
+        parent=styles['Normal'],
+        fontName='Times-Italic',
+        fontSize=7.5,
+        leading=9.5,
+        textColor=colors.HexColor('#64748B'),
+        alignment=1
+    )
 
     elements = []
 
-    # Institution Header
-    elements.append(Paragraph(settings.INSTITUTION_NAME, title_style))
+    # Institution Header — Official Nandha Autonomous Format
+    elements.append(Paragraph(settings.INSTITUTION_NAME.upper(), title_style))
+    elements.append(Spacer(1, 2))
+    elements.append(Paragraph("(An Autonomous Institution • Affiliated to Anna University, Chennai)", inst_sub_style))
+    elements.append(Paragraph("Approved by AICTE, New Delhi • Accredited by NAAC with 'A+' Grade • Erode – 638 052, Tamil Nadu", inst_address_style))
+    elements.append(Spacer(1, 5))
+
+    # Divider Table
+    div_table = Table([[""]], colWidths=[540], rowHeights=[2])
+    div_table.setStyle(TableStyle([
+        ('LINEABOVE', (0, 0), (-1, -1), 1.5, colors.HexColor('#0F172A')),
+        ('TOPPADDING', (0, 0), (-1, -1), 0),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+    ]))
+    elements.append(div_table)
+    elements.append(Spacer(1, 4))
+
     elements.append(Paragraph("OFFICE OF THE CONTROLLER OF EXAMINATIONS", subtitle_style))
-    elements.append(Paragraph("PROVISIONAL GRADE SHEET / RESULT NOTIFICATION", subtext_style))
-    elements.append(Spacer(1, 15))
+    elements.append(Paragraph("PROVISIONAL STATEMENT OF GRADES / RESULT NOTIFICATION", subtext_style))
+    elements.append(Spacer(1, 10))
 
     # Student & Exam Metadata Table
+    dept_display = f"B.E. – {student.department_code}" if not student.department_code.startswith("B.") else student.department_code
     meta_data = [
         [
             Paragraph("<b>Register Number:</b>", cell_style),
@@ -113,8 +182,8 @@ def generate_marksheet_pdf(
             Paragraph(session.academic_year, cell_style)
         ],
         [
-            Paragraph("<b>Department / Branch:</b>", cell_style),
-            Paragraph(student.department_code, cell_style),
+            Paragraph("<b>Degree & Branch:</b>", cell_style),
+            Paragraph(dept_display, cell_style),
             Paragraph("<b>Semester:</b>", cell_style),
             Paragraph(str(student.current_semester), cell_style)
         ],
@@ -126,24 +195,25 @@ def generate_marksheet_pdf(
         ]
     ]
 
-    meta_table = Table(meta_data, colWidths=[110, 160, 120, 150])
+    meta_table = Table(meta_data, colWidths=[105, 165, 120, 150])
     meta_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F8FAFC')),
-        ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#CBD5E1')),
-        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E2E8F0')),
-        ('TOPPADDING', (0, 0), (-1, -1), 5),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#0F172A')),
+        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CBD5E1')),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
         ('LEFTPADDING', (0, 0), (-1, -1), 6),
         ('RIGHTPADDING', (0, 0), (-1, -1), 6),
     ]))
     elements.append(meta_table)
-    elements.append(Spacer(1, 15))
+    elements.append(Spacer(1, 12))
 
     # Subject Results Table
     result_table_data = [
         [
-            Paragraph("<b>Sub Code</b>", header_cell_style),
-            Paragraph("<b>Subject Title</b>", header_cell_style),
+            Paragraph("<b>S.No</b>", header_cell_style),
+            Paragraph("<b>Course Code</b>", header_cell_style),
+            Paragraph("<b>Course Title</b>", header_left_style),
             Paragraph("<b>Credits</b>", header_cell_style),
             Paragraph("<b>Grade</b>", header_cell_style),
             Paragraph("<b>Result</b>", header_cell_style)
@@ -154,7 +224,7 @@ def generate_marksheet_pdf(
     earned_credits = 0
     has_arrear = False
 
-    for sub in subject_results:
+    for idx, sub in enumerate(subject_results, 1):
         code = str(sub.get("code", "")).strip()
         title = str(sub.get("name", sub.get("title", ""))).strip()
         cr = int(sub.get("credits", 3))
@@ -172,49 +242,91 @@ def generate_marksheet_pdf(
         elif res != "PASS":
             has_arrear = True
 
+        # Color-coded Grade and Result text
+        if grade in ["RA", "SA", "AB", "W"] or res == "RA":
+            grade_para = Paragraph(f"<font color='#B91C1C'><b>{grade}</b></font>", cell_center_style)
+            res_para = Paragraph(f"<font color='#B91C1C'><b>{res}</b></font>", cell_center_style)
+        else:
+            grade_para = Paragraph(f"<font color='#15803D'><b>{grade}</b></font>", cell_center_style)
+            res_para = Paragraph(f"<font color='#15803D'><b>{res}</b></font>", cell_center_style)
+
         result_table_data.append([
-            Paragraph(code, cell_style),
+            Paragraph(str(idx), cell_center_style),
+            Paragraph(code, cell_center_style),
             Paragraph(title, cell_style),
-            Paragraph(str(cr), cell_style),
-            Paragraph(f"<b>{grade}</b>", cell_style),
-            Paragraph(res, cell_style)
+            Paragraph(str(cr), cell_center_style),
+            grade_para,
+            res_para
         ])
 
-    results_table = Table(result_table_data, colWidths=[80, 260, 55, 65, 80])
+    results_table = Table(result_table_data, colWidths=[35, 75, 250, 50, 60, 70])
     results_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0F172A')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('ALIGN', (2, 0), (-1, -1), 'CENTER'),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CBD5E1')),
-        ('TOPPADDING', (0, 0), (-1, -1), 5),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#0F172A')),
+        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#94A3B8')),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 5),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F8FAFC')]),
     ]))
     elements.append(results_table)
-    elements.append(Spacer(1, 15))
+    elements.append(Spacer(1, 10))
 
-    # Overall Status Summary
+    # Overall Status Summary Table
     overall_res = "PASS" if not has_arrear else "FAIL"
+    res_color = '#15803D' if overall_res == 'PASS' else '#B91C1C'
+
     summary_data = [
         [
-            Paragraph(f"<b>Total Registered Credits:</b> {total_credits}", cell_style),
-            Paragraph(f"<b>Total Earned Credits:</b> {earned_credits}", cell_style),
-            Paragraph(f"<b>Provisional Status:</b> <font color='{'#15803D' if overall_res == 'PASS' else '#B91C1C'}'><b>{overall_res}</b></font>", cell_style)
+            Paragraph(f"<b>Credits Registered:</b> {total_credits}", cell_style),
+            Paragraph(f"<b>Credits Earned:</b> {earned_credits}", cell_style),
+            Paragraph(f"<b>Provisional Status:</b> <font color='{res_color}'><b>{overall_res}</b></font>", cell_style)
         ]
     ]
     summary_table = Table(summary_data, colWidths=[180, 180, 180])
     summary_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#EFF6FF')),
-        ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#3B82F6')),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F1F5F9')),
+        ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#0F172A')),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
     ]))
     elements.append(summary_table)
-    elements.append(Spacer(1, 25))
+    elements.append(Spacer(1, 28))
+
+    # Official Seal & Signatures Block
+    sig_data = [
+        [
+            Paragraph("<b>Prepared & Verified by</b><br/><font size='7.5' color='#64748B'>Office Superintendent</font>", cell_style),
+            Paragraph(f"<b>Date:</b> {datetime.now(timezone.utc).strftime('%d-%b-%Y')}<br/><font size='7.5' color='#64748B'>COE Publication Wing</font>", cell_center_style),
+            Paragraph("<b>Controller of Examinations</b><br/><font size='7.5' color='#64748B'>Nandha Engineering College (Autonomous)</font>", ParagraphStyle('SigRight', parent=cell_style, alignment=2))
+        ]
+    ]
+    sig_table = Table(sig_data, colWidths=[180, 180, 180])
+    sig_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (0, 0), 'LEFT'),
+        ('ALIGN', (1, 0), (1, 0), 'CENTER'),
+        ('ALIGN', (2, 0), (2, 0), 'RIGHT'),
+        ('TOPPADDING', (0, 0), (-1, -1), 0),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+    ]))
+    elements.append(sig_table)
+    elements.append(Spacer(1, 14))
 
     # Security stamp and verification text
-    verif_text = f"Digitally authenticated and stored by Examination Automation System. Verification Hash: {hashlib.sha256(student.register_number.encode()).hexdigest()[:16]}"
-    elements.append(Paragraph(verif_text, subtext_style))
+    verif_hash = hashlib.sha256(student.register_number.encode()).hexdigest()[:16].upper()
+    elements.append(Paragraph(
+        "Disclaimer: This provisional statement of marks is issued under the authority of the Controller of Examinations for immediate information to the examinees. The final Grade Sheet will be issued separately.",
+        disclaimer_style
+    ))
+    elements.append(Spacer(1, 2))
+    elements.append(Paragraph(
+        f"Digitally Authenticated by Autonomous Examination System • Verification Hash: {verif_hash}",
+        disclaimer_style
+    ))
 
     doc.build(elements)
     return output_path

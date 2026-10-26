@@ -31,10 +31,10 @@ export const Topbar: React.FC<TopbarProps> = ({
     <header className="h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-8 flex items-center justify-between shadow-2xs sticky top-0 z-20">
       {/* Clean Breadcrumb Hierarchy */}
       <div className="flex items-center gap-2.5">
-        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+        <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
           COE Portal
         </span>
-        <span className="text-slate-300 font-bold">/</span>
+        <span className="text-slate-400 font-bold">/</span>
         <h1 className="text-sm font-extrabold text-slate-900 tracking-tight font-heading">
           {currentTabName}
         </h1>
@@ -46,11 +46,11 @@ export const Topbar: React.FC<TopbarProps> = ({
         {onOpenSearch && (
           <button
             onClick={onOpenSearch}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 text-xs font-semibold shadow-2xs transition-all cursor-pointer"
           >
             <Search className="w-3.5 h-3.5 text-blue-600" />
             <span className="hidden sm:inline">Search...</span>
-            <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 rounded-md bg-white border border-slate-200 text-[10px] font-mono font-bold text-slate-500">
+            <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 rounded-md bg-white border border-slate-300 text-[10px] font-mono font-bold text-slate-700">
               Ctrl+K
             </kbd>
           </button>

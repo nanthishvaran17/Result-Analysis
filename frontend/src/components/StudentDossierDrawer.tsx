@@ -93,20 +93,20 @@ export const StudentDossierDrawer: React.FC<StudentDossierDrawerProps> = ({ stud
           {/* Metadata Cards */}
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
-              <span className="text-[10px] text-slate-400 block font-semibold uppercase">Department</span>
-              <span className="font-bold text-slate-900 mt-0.5 block">{student.department_code}</span>
+              <span className="text-xs text-slate-600 block font-bold uppercase">Department</span>
+              <span className="font-extrabold text-slate-900 mt-0.5 block">{student.department_code}</span>
             </div>
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
-              <span className="text-[10px] text-slate-400 block font-semibold uppercase">Batch Cohort</span>
-              <span className="font-bold text-slate-900 mt-0.5 block">{student.batch}</span>
+              <span className="text-xs text-slate-600 block font-bold uppercase">Batch Cohort</span>
+              <span className="font-extrabold text-slate-900 mt-0.5 block">{student.batch}</span>
             </div>
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
-              <span className="text-[10px] text-slate-400 block font-semibold uppercase">Current Semester</span>
-              <span className="font-bold text-slate-900 mt-0.5 block">Semester {student.current_semester}</span>
+              <span className="text-xs text-slate-600 block font-bold uppercase">Current Semester</span>
+              <span className="font-extrabold text-slate-900 mt-0.5 block">Semester {student.current_semester}</span>
             </div>
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
-              <span className="text-[10px] text-slate-400 block font-semibold uppercase">Class Section</span>
-              <span className="font-bold text-slate-900 mt-0.5 block">Section {student.section}</span>
+              <span className="text-xs text-slate-600 block font-bold uppercase">Class Section</span>
+              <span className="font-extrabold text-slate-900 mt-0.5 block">Section {student.section}</span>
             </div>
           </div>
 
@@ -184,11 +184,11 @@ export const StudentDossierDrawer: React.FC<StudentDossierDrawerProps> = ({ stud
                       <div className="min-w-0 pr-3">
                         <div className="flex items-center gap-2">
                           <span className="font-mono font-bold text-slate-900">{sub.subject_code}</span>
-                          <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-slate-100 text-slate-600 font-medium">
+                          <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 font-bold border border-slate-200">
                             {sub.credits} Credits
                           </span>
                         </div>
-                        <div className="text-[11px] text-slate-500 truncate mt-0.5">{sub.subject_name}</div>
+                        <div className="text-xs text-slate-700 font-semibold truncate mt-0.5">{sub.subject_name}</div>
                       </div>
                       <div className="text-right shrink-0">
                         <span

@@ -10,7 +10,6 @@ import {
   Calendar,
   Play,
   ArrowUpRight,
-  Sparkles,
   ShieldCheck,
   FileText,
   BarChart3
@@ -200,9 +199,9 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ onNavigate
                 <div className="text-3xl font-extrabold text-slate-900 font-heading font-mono">
                   {kpi.value}
                 </div>
-                <p className="text-[11px] text-slate-400 mt-0.5 font-medium">{kpi.desc}</p>
+                <p className="text-xs text-slate-600 mt-1 font-semibold">{kpi.desc}</p>
               </div>
-              <div className="flex items-center text-[11px] font-bold text-slate-500 group-hover:text-blue-600 transition-colors pt-2 border-t border-slate-100">
+              <div className="flex items-center text-xs font-bold text-slate-700 group-hover:text-blue-600 transition-colors pt-2 border-t border-slate-100">
                 <span>View in {kpi.tab}</span>
                 <ArrowUpRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </div>
@@ -217,10 +216,10 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ onNavigate
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <h3 className="font-extrabold text-slate-900 text-sm font-heading flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-blue-600" />
+              <Activity className="w-4 h-4 text-blue-600" />
               <span>Core Operations Hub</span>
             </h3>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Direct Access</span>
+            <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Direct Access</span>
           </div>
 
           <div className="grid grid-cols-2 gap-3 text-xs">
@@ -230,7 +229,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ onNavigate
             >
               <Users className="w-5 h-5 text-blue-600 mb-2 transition-transform group-hover:scale-110" />
               <div className="font-bold text-slate-900">Student Registry</div>
-              <p className="text-[11px] text-slate-500 mt-0.5">Manage cohorts & Smart Excel entry</p>
+              <p className="text-xs text-slate-600 mt-1 font-medium">Manage cohorts & Smart Excel entry</p>
             </button>
 
             <button
@@ -239,7 +238,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ onNavigate
             >
               <FileSpreadsheet className="w-5 h-5 text-emerald-600 mb-2 transition-transform group-hover:scale-110" />
               <div className="font-bold text-slate-900">Enterprise Excel</div>
-              <p className="text-[11px] text-slate-500 mt-0.5">Generate verified 5-sheet workbooks</p>
+              <p className="text-xs text-slate-600 mt-1 font-medium">Generate verified 5-sheet workbooks</p>
             </button>
 
             <button
@@ -248,7 +247,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ onNavigate
             >
               <BarChart3 className="w-5 h-5 text-indigo-600 mb-2 transition-transform group-hover:scale-110" />
               <div className="font-bold text-slate-900">Result Analysis</div>
-              <p className="text-[11px] text-slate-500 mt-0.5">Student marksheet breakdown & GPA</p>
+              <p className="text-xs text-slate-600 mt-1 font-medium">Student marksheet breakdown & GPA</p>
             </button>
 
             <button
@@ -257,7 +256,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ onNavigate
             >
               <FileText className="w-5 h-5 text-purple-600 mb-2 transition-transform group-hover:scale-110" />
               <div className="font-bold text-slate-900">PDF Management</div>
-              <p className="text-[11px] text-slate-500 mt-0.5">Secure provisional marksheets</p>
+              <p className="text-xs text-slate-600 mt-1 font-medium">Secure provisional marksheets</p>
             </button>
           </div>
         </div>

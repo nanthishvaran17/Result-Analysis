@@ -21,8 +21,7 @@ import {
   Upload,
   Plus,
   Trash2,
-  CheckCircle2,
-  Sparkles
+  CheckCircle2
 } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
@@ -691,7 +690,7 @@ export const ResultAutomationCenter: React.FC<ResultAutomationCenterProps> = ({ 
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4" />
+                    <RefreshCw className="w-4 h-4" />
                     <span>
                       Sync {bulkRows.filter((r) => r.register_number.trim() && r.dob.trim()).length} Candidates Live
                     </span>
@@ -770,7 +769,7 @@ export const ResultAutomationCenter: React.FC<ResultAutomationCenterProps> = ({ 
             </div>
 
             <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
-              <span>✨ Typing into the last row automatically appends the next empty row dynamically.</span>
+              <span>Typing into the last row automatically appends the next empty row dynamically.</span>
               <span>Total rows: <strong className="text-white">{bulkRows.length}</strong></span>
             </div>
 

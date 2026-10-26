@@ -165,3 +165,29 @@ input:focus, select:focus, textarea:focus {
   outline: none !important;
   outline-offset: 0 !important;
 }
+
+/* Universal High-Contrast Readability Enhancements */
+.bg-white .text-slate-400,
+.bg-slate-50 .text-slate-400,
+.bg-slate-100 .text-slate-400,
+table .text-slate-400 {
+  color: #475569 !important; /* Slate 600 - crisp, non-faint */
+  font-weight: 600;
+}
+
+.bg-white .text-slate-500,
+.bg-slate-50 .text-slate-500,
+.bg-slate-100 .text-slate-500,
+table .text-slate-500 {
+  color: #1e293b !important; /* Slate 800 - dark, high-contrast, easily visible */
+  font-weight: 500;
+}
+
+.bg-white .text-gray-400,
+.bg-white .text-gray-500,
+.bg-slate-50 .text-gray-400,
+.bg-slate-50 .text-gray-500 {
+  color: #1f2937 !important;
+  font-weight: 500;
+}
+

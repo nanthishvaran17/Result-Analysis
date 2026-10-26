@@ -13,7 +13,6 @@ import {
   Edit2,
   Copy,
   Table,
-  Sparkles,
   Save,
   RotateCcw,
   Eye,
@@ -747,7 +746,7 @@ export const StudentRegistry: React.FC = () => {
             </div>
             <div className="flex items-center gap-3">
               <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5" />
+                <Plus className="w-3.5 h-3.5" />
                 <span>Auto-creates a new row when typing in the last row</span>
               </span>
               <button
@@ -1335,7 +1334,7 @@ export const StudentRegistry: React.FC = () => {
           <div className="p-4 bg-blue-50/80 border border-blue-200/80 rounded-xl text-blue-900 space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-extrabold text-xs flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-blue-600" />
+                <FileSpreadsheet className="w-4 h-4 text-blue-600" />
                 <span>Required Excel Columns</span>
               </span>
               <button

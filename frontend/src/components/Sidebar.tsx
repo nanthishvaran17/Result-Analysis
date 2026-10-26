@@ -47,7 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onSig
           <div className="font-extrabold text-sm tracking-tight text-white font-heading">
             EXAM PORTAL
           </div>
-          <div className="text-[10px] text-slate-400 font-medium truncate">
+          <div className="text-xs text-slate-300 font-semibold truncate">
             Office of the Controller
           </div>
         </div>
@@ -57,7 +57,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onSig
       <div className="flex-1 py-4 px-3 space-y-4 overflow-y-auto">
         {/* Core Operations Section */}
         <div className="space-y-1">
-          <div className="px-3 pb-1.5 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+          <div className="px-3 pb-1.5 text-xs font-extrabold tracking-wider text-slate-300 uppercase">
             Operations
           </div>
           {primaryNavigation.map((item) => {
@@ -70,12 +70,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onSig
                 className={`w-full flex items-center px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-left ${
                   isActive
                     ? 'bg-blue-600 text-white shadow-sm font-bold'
-                    : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                    : 'text-slate-200 hover:bg-slate-900 hover:text-white'
                 }`}
               >
                 <Icon
                   className={`w-4 h-4 mr-3 shrink-0 ${
-                    isActive ? 'text-white' : 'text-slate-400'
+                    isActive ? 'text-white' : 'text-slate-300'
                   }`}
                 />
                 <span className="truncate">{item.name}</span>
@@ -86,7 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onSig
 
         {/* Reports & Archives Section */}
         <div className="border-t border-slate-800/60 pt-3">
-          <div className="px-3 pb-1.5 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+          <div className="px-3 pb-1.5 text-xs font-extrabold tracking-wider text-slate-300 uppercase">
             Reports & Records
           </div>
           <div className="space-y-1">
@@ -100,12 +100,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onSig
                   className={`w-full flex items-center px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-left ${
                     isActive
                       ? 'bg-blue-600 text-white shadow-sm font-bold'
-                      : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                      : 'text-slate-200 hover:bg-slate-900 hover:text-white'
                   }`}
                 >
                   <Icon
                     className={`w-4 h-4 mr-3 shrink-0 ${
-                      isActive ? 'text-white' : 'text-slate-400'
+                      isActive ? 'text-white' : 'text-slate-300'
                     }`}
                   />
                   <span className="truncate">{item.name}</span>
