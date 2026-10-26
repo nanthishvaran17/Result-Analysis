@@ -46,6 +46,7 @@
   - [3. Cryptographic Marksheet Extraction & SHA-256 Digest](#3-cryptographic-marksheet-extraction--sha-256-digest)
   - [4. Deterministic Academic GPA & Arrear Formulation](#4-deterministic-academic-gpa--arrear-formulation)
   - [5. Live Automation Control Center & Transient Retry](#5-live-automation-control-center--transient-retry)
+  - [6. Executive Institutional Authentication Portal & Clearance](#6-executive-institutional-authentication-portal--clearance)
 - [🎨 Design System & Executive Aesthetics](#-design-system--executive-aesthetics)
 - [⚡ Performance Benchmarks](#-performance-benchmarks)
 - [🛡️ Security Architecture & Threat Model](#️-security-architecture--threat-model)
@@ -317,6 +318,39 @@ The automated processing engine handles batch portal retrieval and marksheet syn
 * **Interactive Controls**: Staff can `PAUSE`, `RESUME`, or `CANCEL` active batch jobs with one click.
 * **Transient Error Resilience**: Network timeouts or temporary portal drops auto-retry with exponential backoff before being flagged for manual review.
 * **Live WebSocket / Polling Terminal**: Real-time console logs display per-student processing status, elapsed time, and live error traces.
+
+---
+
+### 6. Executive Institutional Authentication Portal & Clearance
+
+The platform features an executive, collegiate authentication experience designed with a balanced **50/50 split viewport** layout engineered for institutional security, visual prestige, and instantaneous staff clearance:
+
+```
+┌───────────────────────────────────────────────────┬───────────────────────────────────────────────────┐
+│ [AUTONOMOUS COE PORTAL · LIVE RESULT AUDIT]       │ SIGN IN TO YOUR WORKSPACE                         │
+│                                                   │ Use your institutional email to authenticate.     │
+│ [25 NEC] NANDHA ENGINEERING COLLEGE               │                                                   │
+│          Autonomous · Affiliated to AU · NAAC 'A+'│ [SELECT ROLE (1-CLICK CLEARANCE)]                 │
+│                                                   │ ┌───────────────┐ ┌───────────────┐ ┌───────────┐ │
+│ "Every marksheet, verified and on record."        │ │  Chief Admin  │ │ Exam Officer  │ │   Dean    │ │
+│                                                   │ │    @admin     │ │ @exam_officer │ │ @faculty  │ │
+│ Institutional telemetry, gazette synchronization, │ └───────────────┘ └───────────────┘ └───────────┘ │
+│ deterministic GPA engine, and forensic marksheets.│                                                   │
+│                                                   │ Institutional Email or User ID                    │
+│ ┌───────────────────────────────────────────────┐ │ [ admin                                         ] │
+│ │ 👥 1,240+ Enrolled Students Across Cohorts    │ │                                                   │
+│ │ ⚡ COE Gazette Extraction Engine: ACTIVE       │ │ Password                                        │
+│ │ 🛡️ Cryptographic SHA-256 Digest: VERIFIED     │ │ [ •••••••••••••••••                           ] │
+│ └───────────────────────────────────────────────┘ │                                                   │
+│                                                   │ [            Sign In to Workspace           ]     │
+└───────────────────────────────────────────────────┴───────────────────────────────────────────────────┘
+```
+
+* **50/50 Balanced Split Viewport**: Equal-width architectural layout on desktop screens (`w-full lg:w-1/2` for both hero and form panels) ensuring seamless visual balance without cramped sidebars.
+* **Autonomous Campus Aerial Telemetry Hero**: Showcases Nandha Engineering College's drone aerial campus backdrop overlaid with the official 25-Year COE institutional emblem, NAAC 'A+' credentials, and live telemetry cards (`1,240+ Students`, `COE Gazette Engine Active`, `SHA-256 Digest Verified`).
+* **Top-Mounted 1-Click Role Clearance**: Located directly above the sign-in fields for instant evaluator access (`Chief Admin`, `Exam Officer`, and `Dean / Auditor`) with interactive border states and clear badge identification.
+* **High-Contrast Solid White Workspace**: Crisp `#ffffff` container eliminating background bleed-through, featuring deep slate typography (`#0f172a`), refined single-password input, and secure token dispatch.
+* **Provisional Marksheet Verification Stamp**: Integrated with the ReportLab & interactive PDF modal with official Controller of Examinations disclaimer and 16-character SHA-256 verification hash.
 
 ---
 

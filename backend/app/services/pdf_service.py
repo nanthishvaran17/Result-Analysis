@@ -137,9 +137,18 @@ def generate_marksheet_pdf(
         'DisclaimerText',
         parent=styles['Normal'],
         fontName='Times-Italic',
-        fontSize=7.5,
-        leading=9.5,
-        textColor=colors.HexColor('#64748B'),
+        fontSize=8.5,
+        leading=11,
+        textColor=colors.HexColor('#1E293B'),
+        alignment=1
+    )
+    hash_style = ParagraphStyle(
+        'HashText',
+        parent=styles['Normal'],
+        fontName='Times-Bold',
+        fontSize=8.5,
+        leading=11,
+        textColor=colors.HexColor('#0F172A'),
         alignment=1
     )
 
@@ -345,13 +354,13 @@ def generate_marksheet_pdf(
     # Security stamp and verification text
     verif_hash = hashlib.sha256(student.register_number.encode()).hexdigest()[:16].upper()
     elements.append(Paragraph(
-        "Disclaimer: This provisional statement of marks is issued under the authority of the Controller of Examinations for immediate information to the examinees. The final Grade Sheet will be issued separately.",
+        "<b>Disclaimer:</b> This provisional statement of marks is issued under the authority of the Controller of Examinations for immediate information to the examinees. The final Grade Sheet will be issued separately.",
         disclaimer_style
     ))
-    elements.append(Spacer(1, 2))
+    elements.append(Spacer(1, 3))
     elements.append(Paragraph(
         f"Digitally Authenticated by Autonomous Examination System • Verification Hash: {verif_hash}",
-        disclaimer_style
+        hash_style
     ))
 
     doc.build(elements)

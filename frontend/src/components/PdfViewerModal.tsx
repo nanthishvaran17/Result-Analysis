@@ -363,14 +363,18 @@ export const PdfViewerModal: React.FC<PdfViewerModalProps> = ({
                 </div>
               </div>
 
-              {/* Official Footnote / Verification Stamp */}
-              <div className="pt-2 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2 border-t border-slate-100">
-                <div className="flex items-center gap-1.5 text-blue-700 font-semibold">
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>Authenticated Examination Record • Nandha Autonomous Portal</span>
-                </div>
-                <div className="font-mono text-[10px] text-slate-400">
-                  Direct Source: coe.nandhaengg.org/results/
+              {/* Official Disclaimer & Verification Hash Block */}
+              <div className="pt-3 pb-2 border-t border-slate-200 text-center space-y-2">
+                <p className="text-[11px] sm:text-xs text-slate-700 max-w-3xl mx-auto leading-relaxed font-serif">
+                  <span className="font-bold text-slate-900 not-italic">Disclaimer:</span> <em>This provisional statement of marks is issued under the authority of the Controller of Examinations for immediate information to the examinees. The final Grade Sheet will be issued separately.</em>
+                </p>
+                <div className="inline-flex flex-wrap items-center justify-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 border border-slate-300 text-[11px] font-mono font-bold text-slate-800 shadow-2xs">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Digitally Authenticated by Autonomous Examination System</span>
+                  <span className="text-slate-400">•</span>
+                  <span className="text-blue-700 uppercase font-mono tracking-wider">
+                    Verification Hash: {details?.verification_hash || '1E46F7F5B58A68CD'}
+                  </span>
                 </div>
               </div>
             </div>

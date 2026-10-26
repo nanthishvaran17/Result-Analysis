@@ -14,7 +14,6 @@ import {
   Shield,
   FileSpreadsheet,
   Award,
-  Sparkles,
   Check
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -237,18 +236,15 @@ export const Login: React.FC = () => {
           </div>
 
           {/* ========================================================================= */}
-          {/* 3 ROLE CLEARANCE CARDS: MOVED TO TOP FOR INSTANT 1-CLICK ACCESS           */}
+          {/* EXECUTIVE ROLE CLEARANCE SELECTOR (Star-Free & Seamless)                  */}
           {/* ========================================================================= */}
-          <div className="mb-3.5 p-3 rounded-2xl bg-slate-50 border border-slate-200/90 shadow-2xs">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span className="text-[10.5px] font-black text-slate-800 uppercase tracking-wider">
-                  Select Role (1-Click Autofill)
-                </span>
-              </div>
-              <span className="text-[9px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-bold uppercase tracking-wider">
-                Instant Access
+          <div className="mb-3.5">
+            <div className="flex items-center justify-between mb-2 px-0.5">
+              <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                Authorized Personnel Clearance
+              </span>
+              <span className="text-[9.5px] px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold uppercase tracking-wider border border-blue-200/60">
+                1-Click Access
               </span>
             </div>
 
