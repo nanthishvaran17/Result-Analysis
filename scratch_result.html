@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Nandha - Results</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <style>
+       /* table.result-table th,
+        table.result-table td {
+            border: 1px solid #efefef;
+            padding: 12px 12px;
+        }*/
+        
+           table.result-table th,
+        table.result-table td {
+            border: 1px solid #efefef;
+            padding: 8px 8px;
+            font-size: 12px;
+        }
+
+        .np {
+            padding-right: 8px;
+            padding-left: 8px;
+        }
+
+        .student_data {
+            width: 60%;
+            margin: auto;
+        }
+
+        table.result-table {
+            width: 60%;
+            margin: auto;
+        }
+
+        .stu_reg {
+            background: #75BEF3;
+            padding: 8px 8px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+.stu_name h4, .stu_name h3, .stu_reg h4, .stu_reg h3 {
+    font-size: 16px;
+    font-weight: 600;
+}
+        .stu_name {
+            background: #FFD9AD;
+            padding: 8px 8px;
+            text-align: center;
+        }
+
+   
+
+        table.result-table.grade_point {
+            margin-top: 35px;
+        }
+
+        table.result-table th {
+            background: #004A80;
+            color: #fff;
+            text-align: center;
+        }
+
+        .result-table tr:nth-child(even) {
+            background: #fff;
+        }
+
+        .result-table tr:nth-child(odd) {
+            background: #E9F6FF;
+        }
+
+        .down_btn h5 a {
+            background: #004a80;
+            padding: 10px;
+            color: #fff;
+            font-weight: 600;
+            text-decoration: unset;
+        }
+
+        .down_btn h5 a img {
+            width: 20px;
+            margin-right: 10px;
+        }
+
+        .down_btn {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .stud_data {
+            width: 59%;
+            margin: auto;
+            border: 1px solid #efefef;
+        }
+
+        .stud_data h4 {
+            background: #004a80;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 10px;
+            margin-top: 0;
+        }
+
+        .stud_data table {
+            /* background: antiquewhite; */
+            margin-bottom: 15px !important;
+            text-align: center;
+            margin: auto;
+        }
+
+        .stud_data td {
+            border: 1px solid #efefef;
+            padding: 12px;
+        }
+		.main-logo {
+    text-align: center;
+}
+
+
+
+@media screen and (max-width: 500px) {
+.main-logo img {
+    width: 100%;
+}
+   form{width: 100%;} 
+   .grade_point_table {
+    width: 100%;
+    overflow-x: auto;
+}
+.stu_reg{
+    padding: 8px 8px;
+    margin-bottom: 8px;
+}
+.stu_name h4, .stu_name h3, .stu_reg h4, .stu_reg h3 {
+    font-size: 14px;
+    
+}
+.student_data {
+     width: 100%;
+    margin-top: 8px;
+}
+table.result-table {
+    width: 100%;}
+table.result-table th, table.result-table td{padding: 8px 8px;font-size: 12px;}    
+   .resu_table {margin-top: 10px;}
+}
+    </style>
+</head>
+
+<body>
+<header>
+<div class="main-logo">
+<div class="container">
+<div class="row">
+<img src="Logo.png">
+</div>
+</div>
+</div>
+</header>
+
+    <div class="result-sec">
+        <div class="container">
+
+            <div class="row">
+                <div class="student_data">
+                    <div class="col-md-6 col-sm-12 np">
+                        <div class="stu_reg">
+                            <h4>Register Number :</h4>
+                            <h3>732224CC031</h3>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-sm-12 np">
+                        <div class="stu_name">
+                            <h4>Name :</h4>
+                            <h3>NANTHISH  S</h3>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+         
+            <div class="row">
+                <div class="student_data">
+                    <div class="col-md-6 col-sm-12 np">
+                        <div class="stu_reg">
+                            <h4>Year Of Passing :</h4>
+                            <h3>Apr/May-2026</h3>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-sm-12 np">
+                        <div class="stu_name">
+                            <h4>Branch :</h4>
+                            <h3>B.E - COMPUTER SCIENCE AND ENGINEERING (CYBER SECURITY)</h3>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+<div class="resu_table">
+            <table class="result-table">
+                <tbody>
+                    <tr>
+                        <th>COURSE CODE</th>
+                        <th>COURSE NAME</th>
+                        <th>GRADE</th>
+                        <th>RESULT</th>
+                    </tr>
+                    <tr> <td >22CCC08</td><td >ARTIFICIAL INTELLIGENCE AND MACHINE LEARNING</td><td >A</td><td >PASS</td></tr><tr> <td >22CCC09</td><td >SECURE SOFTWARE ENGINEERING</td><td >A</td><td >PASS</td></tr><tr> <td >22CCC10</td><td >DATABASE SECURITY</td><td >O</td><td >PASS</td></tr><tr> <td >22CCC11</td><td >ADVANCED JAVA PROGRAMMING</td><td >A+</td><td >PASS</td></tr><tr> <td >22CCC12</td><td >CRYPTOGRAPHY AND NETWORK SECURITY</td><td >A+</td><td >PASS</td></tr><tr> <td >22CYB07</td><td >ENVIRONMENTAL SCIENCE AND ENGINEERING</td><td >B+</td><td >PASS</td></tr><tr> <td >22CCP06</td><td >ADVANCED JAVA PROGRAMMING LABORATORY</td><td >O</td><td >PASS</td></tr><tr> <td >22CCP07</td><td >DATABASE SECURITY LABORATORY</td><td >O</td><td >PASS</td></tr><tr> <td >22CCP08</td><td >CRYPTOGRAPHY AND NETWORK SECURITY LABORATORY</td><td >O</td><td >PASS</td></tr><tr> <td >22MAN07R</td><td >SOFT / ANALYTICAL SKILLS - III</td><td >VG</td><td >PASS</td></tr><tr> <td >22GED01</td><td >PERSONALITY AND CHARACTER DEVELOPMENT</td><td >VG</td><td >PASS</td></tr><tr> <td >22CCI08</td><td >APPLIED PENETRATION TESTING AND SECURITY ASSESSMENT</td><td >O</td><td >PASS</td></tr><tr> <td >NOC25CE122</td><td >INTEGRATED WASTE MANAGEMENT FOR A SMART CITY</td><td >B</td><td >PASS</td></tr>                </tbody>
+            </table>
+            </div>
+<div class="grade_point_table">
+
+<table class="result-table grade_point">       
+<tbody>
+    <tr>
+<td colspan="14" style="text-align: center;">
+<strong>ACADEMIC YEAR 2025 -2026 ONWARDS</strong>
+</td>
+</tr>
+<tr>
+<td colspan="14" style="text-align: center;">
+<strong>AWARD OF GRADE</strong>
+</td>
+</tr>
+<tr>
+<td >
+<strong>Range of Marks</strong>
+</td>
+<td >
+<strong>91-100</strong>
+</td>
+<td >
+<strong>81-90</strong>
+</td>
+<td >
+<strong>71-80</strong>
+</td>
+<td >
+<strong>66-70</strong>
+</td>
+<td >
+<strong>61-65</strong>
+</td>
+<td >
+<strong>56-60</strong>
+</td>
+<td >
+<strong>50-55</strong>
+</td>
+<td >
+<strong>&lt;50</strong>
+</td>
+<td >
+<strong>-</strong>
+</td>
+<td >
+<strong>-</strong>
+</td>
+<td >
+<strong>-</strong>
+</td>
+<td >
+<strong>-</strong>
+</td>
+<td >
+<strong>-</strong>
+</td>
+</tr> 
+<tr>
+<td>
+<strong>Grade &nbsp;Point</strong>
+</td>
+<td >
+<strong>10</strong>
+</td>
+<td >
+<strong>9</strong>
+</td>
+<td >
+<strong>8</strong>
+</td>
+<td >
+<strong>7</strong>
+</td>
+<td >
+<strong>6.5</strong>
+</td>
+<td >
+<strong>6</strong>
+</td>
+<td >
+<strong>5</strong>
+</td>
+<td >
+<strong>0</strong>
+</td>
+<td >
+<strong>0</strong>
+</td>
+<td >
+<strong>0</strong>
+</td>
+<td >
+<strong>-</strong>
+</td>
+<td >
+<strong>-</strong>
+</td>
+<td >
+<strong>-</strong>
+</td>
+</tr>
+<tr>
+<td >
+<strong>Letter Grade</strong>
+</td>
+<td >
+<strong>S</strong>
+</td>
+<td >
+<strong>A+</strong>
+</td>
+<td >
+<strong>A</strong>
+</td>
+<td >
+<strong>B+</strong>
+</td>
+<td >
+<strong>B</strong>
+</td>
+<td >
+<strong>C+</strong>
+</td>
+<td >
+<strong>C</strong>
+</td>
+<td >
+<strong>U</strong>
+</td>
+<td >
+<strong>SA</strong>
+</td>
+<td >
+<strong>WC</strong>
+</td>
+<td >
+<strong>VG</strong>
+</td>
+<td >
+<strong>G</strong>
+</td>
+<td >
+<strong>SF</strong>
+</td>
+</tr>
+ <tr>
+<td colspan="8" style="text-align: center;">
+<strong>LETTER GRADE</strong>
+</td>
+<td colspan="6" style="text-align: center;">
+<strong>NON CREDIT COURSES</strong>
+</td>
+</tr>
+<tr>
+<td colspan="4">
+S&nbsp; (Outstanding)
+</td>
+<td colspan="4">
+C+&nbsp; (Average)
+</td>
+<td colspan="6">
+VG&nbsp; (Very Good)
+</td>
+</tr>
+<tr>
+<td colspan="4">
+A +&nbsp; (Excellent)
+</td>
+<td colspan="4">
+C&nbsp; (Satisfactory)
+</td>
+<td colspan="6">
+G&nbsp;&nbsp; (Good)
+</td>
+</tr>
+<tr>
+<td colspan="4">
+A&nbsp;&nbsp; (Very Good)
+</td>
+<td colspan="4">
+U&nbsp;&nbsp; (RA - Reappearance )
+</td>
+<td colspan="6">
+SF ( Satisfactory )
+</td>
+</tr>
+<tr>
+<td colspan="4">
+B +&nbsp; (Good)
+</td>
+<td colspan="4">
+SA&nbsp;  (Shortage of Attendance) 
+</td>
+<td colspan="6"> - </td>
+</tr>
+<tr>
+<td colspan="4">
+B&nbsp;&nbsp; (Above Average)
+</td>
+<td colspan="4">
+WC&nbsp;&nbsp; (Withdrawal of Course)
+</td>
+<td colspan="6"> WH (Withheld) </td>
+
+</tr>
+</tbody>
+</table>
+
+
+ <table class="result-table grade_point">
+              
+<tbody>
+        <tr>
+<td colspan="13" style="text-align: center;">
+<strong>BATCH 2021 - 2025, 2022 - 2026, 2023 - 2027, 2024 - 2028</strong>
+</td>
+</tr>
+<tr>
+<td colspan="13" style="text-align: center;">
+<strong>AWARD OF GRADE</strong>
+</td>
+</tr>
+<tr>
+<td>
+<strong>Letter Grade</strong>
+</td>
+<td>
+<strong>O</strong>
+</td>
+<td>
+<strong>A+</strong>
+</td>
+<td>
+<strong>A</strong>
+</td>
+<td>
+<strong>B+</strong>
+</td>
+<td>
+<strong>B</strong>
+</td>
+<td>
+<strong>C</strong>
+</td>
+<td>
+<strong>RA / U</strong>
+</td>
+<td>
+<strong>AB</strong>
+</td>
+<td>
+<strong>WD</strong>
+</td>
+<td>
+<strong>VG</strong>
+</td>
+<td>
+<strong>G</strong>
+</td>
+<td>
+<strong>SF</strong>
+</td>
+</tr> 
+<tr>
+<td>
+<strong>Grade&nbsp; Point</strong>
+</td>
+<td>
+<strong>10</strong>
+</td>
+<td>
+<strong>9</strong>
+</td>
+<td>
+<strong>8</strong>
+</td>
+<td>
+<strong>7</strong>
+</td>
+<td>
+<strong>6</strong>
+</td>
+<td>
+<strong>5</strong>
+</td>
+<td>
+<strong>0</strong>
+</td>
+<td>
+<strong>-</strong>
+</td>
+<td>
+<strong>-</strong>
+</td>
+<td>
+<strong>-</strong>
+</td>
+<td>
+<strong>-</strong>
+</td>
+<td>
+<strong>-</strong>
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td colspan="8" style="text-align: center;">
+<strong>LETTER GRADE</strong>
+</td>
+<td colspan="5" style="text-align: center;">
+<strong>NON CREDIT COURSES</strong>
+</td>
+</tr>
+<tr>
+<td colspan="4">
+O&nbsp; (Outstanding)
+</td>
+<td colspan="4">
+C&nbsp; (Satisfactory)
+</td>
+<td colspan="5">
+VG&nbsp; (Very Good)
+</td>
+</tr>
+<tr>
+<td colspan="4">
+A +&nbsp; (Excellent)
+</td>
+<td colspan="4">
+U&nbsp;&nbsp; (RA - Reappearance )
+</td>
+<td colspan="5">
+G&nbsp;&nbsp; (Good)
+</td>
+</tr>
+<tr>
+<td colspan="4">
+A&nbsp;&nbsp; (Very Good)
+</td>
+<td colspan="4">
+AB&nbsp; (Absent)
+</td>
+<td colspan="5">
+SF ( Satisfactory )
+</td>
+</tr>
+<tr>
+<td colspan="4">
+B +&nbsp; (Good)
+</td>
+<td colspan="4">
+WD (Withdrawal)
+</td>
+<td colspan="5">&nbsp;</td>
+</tr>
+<tr>
+<td colspan="4">
+B&nbsp;&nbsp; (Average)
+</td>
+<td colspan="4">
+WH (Withheld)
+</td>
+<td colspan="9">&nbsp;</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+        </div>
+    </div>
+
+    <div class="down_btn">
+        <!-- <h5><button onClick="window.print()">Download PDF</button></h5> -->
+        <h5><a href="index.php">Reset</a></h5><br><br>
+        <h5><a href="pdfgen.php" target="_blank"><img src="Pdf File.png">Download PDF</a></h5>
+    </div>
+</body>
+
+</html>

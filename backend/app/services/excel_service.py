@@ -292,15 +292,34 @@ def build_result_analysis_sheet(ws, matrix):
         row_fill = fill_zebra if i % 2 == 0 else fill_white
 
         # Base Columns
-        ws.cell(row=r, column=1, value=i).alignment = align_center
-        reg_cell = ws.cell(row=r, column=2, value=str(student.register_number))
-        reg_cell.number_format = "@"
-        reg_cell.alignment = align_center
+        cell_sno = ws.cell(row=r, column=1, value=i)
+        cell_sno.alignment = align_center
+        cell_sno.font = font_data
 
-        ws.cell(row=r, column=3, value=student.student_name).alignment = align_left
-        ws.cell(row=r, column=4, value=student.department_code).alignment = align_center
-        ws.cell(row=r, column=5, value=student.batch).alignment = align_center
-        ws.cell(row=r, column=6, value=student.semester).alignment = align_center
+        reg_str = str(student.register_number).strip()
+        if reg_str.isdigit() and not reg_str.startswith("0"):
+            reg_cell = ws.cell(row=r, column=2, value=int(reg_str))
+            reg_cell.number_format = "0"
+        else:
+            reg_cell = ws.cell(row=r, column=2, value=reg_str)
+        reg_cell.alignment = align_center
+        reg_cell.font = font_data
+
+        name_cell = ws.cell(row=r, column=3, value=student.student_name)
+        name_cell.alignment = align_left
+        name_cell.font = font_data
+
+        dept_cell = ws.cell(row=r, column=4, value=student.department_code)
+        dept_cell.alignment = align_center
+        dept_cell.font = font_data
+
+        batch_cell = ws.cell(row=r, column=5, value=student.batch)
+        batch_cell.alignment = align_center
+        batch_cell.font = font_data
+
+        sem_cell = ws.cell(row=r, column=6, value=student.semester)
+        sem_cell.alignment = align_center
+        sem_cell.font = font_data
 
         # Subject Grades
         for s_idx, sub in enumerate(matrix.columns):
@@ -310,49 +329,57 @@ def build_result_analysis_sheet(ws, matrix):
             grade_cell.alignment = align_center
 
             if grade in ["RA", "SA", "AB", "W"]:
-                grade_cell.font = Font(name="Calibri", size=10, bold=True, color=FAIL_FONT)
+                grade_cell.font = Font(name="Times New Roman", size=10, bold=True, color=FAIL_FONT)
                 grade_cell.fill = PatternFill(start_color=FAIL_FILL, end_color=FAIL_FILL, fill_type="solid")
             elif grade in PASSING_GRADES:
-                grade_cell.font = Font(name="Calibri", size=10, bold=True, color=PASS_FONT)
+                grade_cell.font = Font(name="Times New Roman", size=10, bold=True, color=PASS_FONT)
                 grade_cell.fill = PatternFill(start_color=PASS_FILL, end_color=PASS_FILL, fill_type="solid")
             else:
-                grade_cell.font = Font(name="Calibri", size=10, color=MUTED_FONT)
+                grade_cell.font = Font(name="Times New Roman", size=10, color=MUTED_FONT)
                 grade_cell.fill = PatternFill(start_color=MUTED_FILL, end_color=MUTED_FILL, fill_type="solid")
 
         # Academic Totals & Status
-        ws.cell(row=r, column=curr_arr_col, value=student.arrears_count).alignment = align_center
-        ws.cell(row=r, column=stand_arr_col, value=student.standing_arrears_count).alignment = align_center
+        curr_arr_cell = ws.cell(row=r, column=curr_arr_col, value=student.arrears_count)
+        curr_arr_cell.alignment = align_center
+        curr_arr_cell.font = font_data
+
+        stand_arr_cell = ws.cell(row=r, column=stand_arr_col, value=student.standing_arrears_count)
+        stand_arr_cell.alignment = align_center
+        stand_arr_cell.font = font_data
 
         gpa_cell = ws.cell(row=r, column=gpa_col, value=student.gpa)
         gpa_cell.number_format = "0.00"
         gpa_cell.alignment = align_center
+        gpa_cell.font = font_data
 
         status_cell = ws.cell(row=r, column=status_col, value=student.result_status)
         status_cell.alignment = align_center
         if student.result_status == "PASS":
             status_cell.fill = PatternFill(start_color=PASS_FILL, end_color=PASS_FILL, fill_type="solid")
-            status_cell.font = Font(name="Calibri", size=10, bold=True, color=PASS_FONT)
+            status_cell.font = Font(name="Times New Roman", size=10, bold=True, color=PASS_FONT)
         elif student.result_status == "WITHHELD":
             status_cell.fill = PatternFill(start_color=AMBER_FILL, end_color=AMBER_FILL, fill_type="solid")
-            status_cell.font = Font(name="Calibri", size=10, bold=True, color=AMBER_FONT)
+            status_cell.font = Font(name="Times New Roman", size=10, bold=True, color=AMBER_FONT)
         else:
             status_cell.fill = PatternFill(start_color=FAIL_FILL, end_color=FAIL_FILL, fill_type="solid")
-            status_cell.font = Font(name="Calibri", size=10, bold=True, color=FAIL_FONT)
+            status_cell.font = Font(name="Times New Roman", size=10, bold=True, color=FAIL_FONT)
 
         verif_val = "VERIFIED" if student.is_verified else "PENDING"
         verif_cell = ws.cell(row=r, column=verif_col, value=verif_val)
         verif_cell.alignment = align_center
         if student.is_verified:
-            verif_cell.font = Font(name="Calibri", size=9, bold=True, color=INFO_FONT)
+            verif_cell.font = Font(name="Times New Roman", size=9, bold=True, color=INFO_FONT)
             verif_cell.fill = PatternFill(start_color=INFO_FILL, end_color=INFO_FILL, fill_type="solid")
         else:
-            verif_cell.font = Font(name="Calibri", size=9, bold=True, color=AMBER_FONT)
+            verif_cell.font = Font(name="Times New Roman", size=9, bold=True, color=AMBER_FONT)
             verif_cell.fill = PatternFill(start_color=AMBER_FILL, end_color=AMBER_FILL, fill_type="solid")
 
         # Apply borders and zebra fill to unstyled cells
         for c in range(1, total_cols + 1):
             cl = ws.cell(row=r, column=c)
             cl.border = table_border
+            if not cl.font:
+                cl.font = font_data
             if not cl.fill or cl.fill.fill_type is None:
                 cl.fill = row_fill
 
@@ -676,9 +703,11 @@ def build_arrear_analysis_sheet(ws, matrix):
 
         failed_subs = [code for code, status in s.subject_statuses.items() if status == "RA"]
 
+        reg_str = str(s.register_number).strip()
+        reg_val = int(reg_str) if reg_str.isdigit() and not reg_str.startswith("0") else reg_str
         vals = [
             (i, align_center, None),
-            (str(s.register_number), align_center, "@"),
+            (reg_val, align_center, "0" if isinstance(reg_val, int) else None),
             (s.student_name, align_left, None),
             (s.department_code, align_center, None),
             (s.arrears_count, align_center, None),
@@ -697,7 +726,7 @@ def build_arrear_analysis_sheet(ws, matrix):
 
             # Highlight arrear numbers
             if c_idx in [5, 6] and isinstance(v, int) and v > 0:
-                cl.font = Font(name="Calibri", size=10, bold=True, color=FAIL_FONT)
+                cl.font = Font(name="Times New Roman", size=10, bold=True, color=FAIL_FONT)
                 cl.fill = PatternFill(start_color=FAIL_FILL, end_color=FAIL_FILL, fill_type="solid")
 
     # Total Summary Row at bottom

@@ -3,9 +3,11 @@ import {
   Search,
   User,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Filter
 } from 'lucide-react';
 import { api } from '../api/client';
+import { CustomDropdown } from '../components/CustomDropdown';
 import type { AuditLogItem } from '../types';
 
 export const ProcessingHistoryAudit: React.FC = () => {
@@ -72,23 +74,26 @@ export const ProcessingHistoryAudit: React.FC = () => {
           />
         </form>
 
-        <div className="flex items-center gap-3">
-          <select
+        <div className="w-56">
+          <CustomDropdown
             value={actionFilter}
-            onChange={(e) => {
-              setActionFilter(e.target.value);
+            onChange={(val) => {
+              setActionFilter(val);
               setPage(1);
             }}
-            className="px-2.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden cursor-pointer"
-          >
-            <option value="">All Action Types</option>
-            <option value="LOGIN">Login & Session</option>
-            <option value="TRIGGER_AUTOMATION">Automation Runs</option>
-            <option value="VERIFY_RESULT">Result Verification</option>
-            <option value="GENERATE_EXCEL_REPORT">Excel Exports</option>
-            <option value="IMPORT_STUDENTS">Student Imports</option>
-            <option value="DOWNLOAD">Downloads</option>
-          </select>
+            options={[
+              { value: '', label: 'All Action Types' },
+              { value: 'LOGIN', label: 'Login & Session', badge: 'AUTH' },
+              { value: 'TRIGGER_AUTOMATION', label: 'Automation Runs', badge: 'ROBOT' },
+              { value: 'VERIFY_RESULT', label: 'Result Verification', badge: 'VERIFY' },
+              { value: 'GENERATE_EXCEL_REPORT', label: 'Excel Exports', badge: 'EXCEL' },
+              { value: 'IMPORT_STUDENTS', label: 'Student Imports', badge: 'DATA' },
+              { value: 'DOWNLOAD', label: 'Downloads', badge: 'EXPORT' },
+            ]}
+            icon={Filter}
+            size="sm"
+            placeholder="Filter Actions..."
+          />
         </div>
       </div>
 

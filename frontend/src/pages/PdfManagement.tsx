@@ -8,11 +8,13 @@ import {
   ChevronRight,
   CheckCircle2,
   AlertCircle,
-  Copy
+  Copy,
+  Filter
 } from 'lucide-react';
 import { api } from '../api/client';
 import { useToast } from '../context/ToastContext';
 import { PdfViewerModal } from '../components/PdfViewerModal';
+import { CustomDropdown } from '../components/CustomDropdown';
 import type { ResultPdfItem } from '../types';
 
 export const PdfManagement: React.FC = () => {
