@@ -297,21 +297,47 @@ def generate_marksheet_pdf(
     elements.append(summary_table)
     elements.append(Spacer(1, 28))
 
-    # Official Seal & Signatures Block
-    sig_data = [
-        [
-            Paragraph("<b>Prepared & Verified by</b><br/><font size='7.5' color='#64748B'>Office Superintendent</font>", cell_style),
-            Paragraph(f"<b>Date:</b> {datetime.now(timezone.utc).strftime('%d-%b-%Y')}<br/><font size='7.5' color='#64748B'>COE Publication Wing</font>", cell_center_style),
-            Paragraph("<b>Controller of Examinations</b><br/><font size='7.5' color='#64748B'>Nandha Engineering College (Autonomous)</font>", ParagraphStyle('SigRight', parent=cell_style, alignment=2))
-        ]
-    ]
+    # Official Seal & Formal Signatures Block
+    seal_markup = (
+        "<font size='7' color='#0F172A'><b>★ OFFICE OF THE CONTROLLER OF EXAMINATIONS ★</b><br/>"
+        "<font size='8' color='#1E3A8A'><b>NANDHA ENGINEERING COLLEGE</b></font><br/>"
+        "<font size='6.5' color='#475569'>AUTONOMOUS • ERODE – 638 052<br/>"
+        "<b>OFFICIAL SEAL</b></font></font>"
+    )
+    seal_cell = Paragraph(seal_markup, ParagraphStyle('SealBlock', parent=cell_center_style, leading=9.5))
+
+    left_sign = Paragraph(
+        "<br/>___________________________<br/>"
+        "<b>Prepared & Verified by</b><br/>"
+        "<font size='7.5' color='#64748B'>Office Superintendent</font><br/>"
+        f"<font size='7' color='#94A3B8'>Date: {datetime.now(timezone.utc).strftime('%d-%b-%Y')}</font>",
+        cell_style
+    )
+
+    right_sign = Paragraph(
+        "<br/>___________________________<br/>"
+        "<b>Controller of Examinations</b><br/>"
+        "<font size='7.5' color='#64748B'>Nandha Engineering College (Autonomous)</font><br/>"
+        f"<font size='7' color='#94A3B8'>COE Publication Wing</font>",
+        ParagraphStyle('SigRight', parent=cell_style, alignment=2)
+    )
+
+    sig_data = [[left_sign, seal_cell, right_sign]]
     sig_table = Table(sig_data, colWidths=[180, 180, 180])
     sig_table.setStyle(TableStyle([
         ('ALIGN', (0, 0), (0, 0), 'LEFT'),
         ('ALIGN', (1, 0), (1, 0), 'CENTER'),
         ('ALIGN', (2, 0), (2, 0), 'RIGHT'),
-        ('TOPPADDING', (0, 0), (-1, -1), 0),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        # Official Embossed Seal Border in Center
+        ('BOX', (1, 0), (1, 0), 1.5, colors.HexColor('#1E3A8A')),
+        ('BACKGROUND', (1, 0), (1, 0), colors.HexColor('#F8FAFC')),
+        ('TOPPADDING', (1, 0), (1, 0), 6),
+        ('BOTTOMPADDING', (1, 0), (1, 0), 6),
+        ('LEFTPADDING', (1, 0), (1, 0), 8),
+        ('RIGHTPADDING', (1, 0), (1, 0), 8),
+        ('TOPPADDING', (0, 0), (0, 0), 0),
+        ('TOPPADDING', (2, 0), (2, 0), 0),
     ]))
     elements.append(sig_table)
     elements.append(Spacer(1, 14))
