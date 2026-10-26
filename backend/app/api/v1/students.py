@@ -13,7 +13,60 @@ from app.models.student import Department, Student
 from app.api.deps import get_current_user, require_roles
 from app.models.user import User
 
+from fastapi.responses import Response
+
 router = APIRouter()
+
+@router.get("/template")
+def download_student_template(
+    current_user: User = Depends(get_current_user)
+):
+    from app.services.student_service import generate_roster_template
+    output = generate_roster_template()
+    return Response(
+        content=output.getvalue(),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=Student_Roster_Template.xlsx"}
+    )
+
+@router.get("/export")
+def export_students(
+    department_code: Optional[str] = None,
+    batch: Optional[str] = None,
+    semester: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    from app.services.student_service import export_students_excel
+    students, _ = get_students(db=db, department_code=department_code, batch=batch, semester=semester, limit=10000)
+    output = export_students_excel(students)
+    return Response(
+        content=output.getvalue(),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=Student_Roster_Export.xlsx"}
+    )
+
+@router.post("/bulk", status_code=status.HTTP_201_CREATED)
+def bulk_add_students(
+    students_in: List[StudentCreate],
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(["ADMIN", "EXAM_STAFF"]))
+):
+    from app.services.student_service import bulk_create_students
+    res = bulk_create_students(db, students_in)
+    client_ip = request.client.host if request.client else "unknown"
+    log_audit(
+        db=db,
+        username=current_user.username,
+        action="BULK_CREATE_STUDENTS",
+        target_entity="StudentRegistry",
+        target_id=f"Count: {res['created_count']}",
+        details=f"Bulk registered {res['created_count']} students (Skipped {res['skipped_count']})",
+        ip_address=client_ip,
+        user_id=current_user.id
+    )
+    return res
 
 @router.get("/departments", response_model=List[DepartmentResponse])
 def list_departments(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

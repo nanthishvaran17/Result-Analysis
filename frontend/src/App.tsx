@@ -66,10 +66,14 @@ const AppContent: React.FC = () => {
   );
 };
 
+import { ToastProvider } from './context/ToastContext';
+
 export default function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
     </AuthProvider>
   );
 }
