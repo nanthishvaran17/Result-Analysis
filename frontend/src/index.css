@@ -155,7 +155,13 @@ body {
   animation: pulseGlow 2.5s infinite;
 }
 
-/* Premium input focus */
+/* Premium input focus & zero double-box outline */
+input, select, textarea, button {
+  outline: none;
+}
+
 input:focus, select:focus, textarea:focus {
   transition: all 0.2s ease;
+  outline: none !important;
+  outline-offset: 0 !important;
 }

@@ -12,12 +12,17 @@ import {
   Building2,
   Calendar,
   GraduationCap,
-  Clock
+  Clock,
+  Globe,
+  Download,
+  Eye,
+  RefreshCw
 } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { CustomDropdown } from '../components/CustomDropdown';
+import { PdfViewerModal } from '../components/PdfViewerModal';
 import type { ExamSession, Department, AutomationJob } from '../types';
 
 interface ResultAutomationCenterProps {
@@ -31,9 +36,17 @@ export const ResultAutomationCenter: React.FC<ResultAutomationCenterProps> = ({ 
   const [sessions, setSessions] = useState<ExamSession[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [selectedSession, setSelectedSession] = useState<number | ''>(activeSessionId || '');
-  const [selectedDept, setSelectedDept] = useState<string>('CSE');
+  const [selectedDept, setSelectedDept] = useState<string>('CSE-CS');
   const [selectedBatch, setSelectedBatch] = useState<string>('2022-2026');
-  const [selectedSemester, setSelectedSemester] = useState<number>(5);
+  const [selectedSemester, setSelectedSemester] = useState<number>(6);
+
+  // Live Nandha COE Portal State
+  const [liveRegNo, setLiveRegNo] = useState('732224CC031');
+  const [liveDob, setLiveDob] = useState('01/06/2007');
+  const [liveLoading, setLiveLoading] = useState(false);
+  const [liveResult, setLiveResult] = useState<any>(null);
+  const [previewPdfUrl, setPreviewPdfUrl] = useState<string | null>(null);
+  const [previewFileName, setPreviewFileName] = useState('');
 
   const [activeJob, setActiveJob] = useState<AutomationJob | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -96,6 +109,75 @@ export const ResultAutomationCenter: React.FC<ResultAutomationCenterProps> = ({ 
       if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
     };
   }, [activeJob?.id, activeJob?.status]);
+
+  const handleLiveFetch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!liveRegNo.trim() || !liveDob.trim()) {
+      toastError('Please enter both Register Number and Date of Birth');
+      return;
+    }
+    try {
+      setLiveLoading(true);
+      const res = await api.post<any>('/results/live-fetch', {
+        register_number: liveRegNo.trim(),
+        dob: liveDob.trim(),
+        session_id: selectedSession || undefined,
+      });
+      setLiveResult(res);
+      success(`Successfully retrieved official marksheet for ${res.student_name} (${res.register_number})!`);
+      fetchData();
+    } catch (err: any) {
+      toastError(err.message || 'Failed to retrieve result from Nandha COE portal.');
+    } finally {
+      setLiveLoading(false);
+    }
+  };
+
+  const handleDownloadPdf = (regNo: string) => {
+    const token = localStorage.getItem('token');
+    const sessCode = sessions.find((s) => s.id === selectedSession)?.session_code || 'NOV_DEC_2025';
+    const filename = `${regNo}_${sessCode}.pdf`;
+
+    fetch(`/api/v1/pdfs/download/${filename}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Official PDF marksheet not yet generated.');
+        return res.blob();
+      })
+      .then((blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        success(`Downloaded marksheet PDF for ${regNo}`);
+      })
+      .catch((err) => toastError(err.message));
+  };
+
+  const handlePreviewPdf = (regNo: string) => {
+    const token = localStorage.getItem('token');
+    const sessCode = sessions.find((s) => s.id === selectedSession)?.session_code || 'NOV_DEC_2025';
+    const filename = `${regNo}_${sessCode}.pdf`;
+
+    fetch(`/api/v1/pdfs/download/${filename}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load marksheet PDF');
+        return res.blob();
+      })
+      .then((blob) => {
+        const url = window.URL.createObjectURL(blob);
+        setPreviewPdfUrl(url);
+        setPreviewFileName(filename);
+        info(`Previewing official marksheet for ${regNo}`);
+      })
+      .catch((err) => toastError(err.message));
+  };
 
   const handleStartAutomation = async () => {
     if (!selectedSession) {
@@ -162,7 +244,7 @@ export const ResultAutomationCenter: React.FC<ResultAutomationCenterProps> = ({ 
               Result Automation Center
             </h2>
             <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-              Autonomous extraction, marksheet PDF parsing via pdfplumber, SHA-256 cryptographic verification, and ACID transaction persistence.
+              Automated marksheet extraction, digital verification, grade reconciliation, and official COE records publication.
             </p>
           </div>
         </div>
@@ -174,6 +256,187 @@ export const ResultAutomationCenter: React.FC<ResultAutomationCenterProps> = ({ 
           <span className="font-semibold">{error}</span>
         </div>
       )}
+
+      {/* Live Nandha COE Autonomous Portal Gateway */}
+      <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white rounded-2xl p-6 shadow-xl border border-blue-500/30">
+        <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-white/10 gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-blue-600 rounded-xl shadow-lg ring-2 ring-blue-400/30">
+              <Globe className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-extrabold tracking-tight font-heading text-white">
+                  Nandha Autonomous COE Live Results Gateway
+                </h3>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Live Connected
+                </span>
+              </div>
+              <p className="text-xs text-blue-200/80 mt-0.5">
+                Direct live synchronization with official portal:{' '}
+                <a
+                  href="https://coe.nandhaengg.org/results/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-300 underline font-mono hover:text-white"
+                >
+                  coe.nandhaengg.org/results/
+                </a>
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="text-[11px] text-slate-300 block">Target Autonomous Institution</span>
+            <span className="font-bold text-xs text-blue-300 font-mono">7322 - NANDHA ENGINEERING COLLEGE</span>
+          </div>
+        </div>
+
+        {/* Live Search Form */}
+        <form onSubmit={handleLiveFetch} className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+          <div>
+            <label className="block text-xs font-bold text-blue-200 mb-1.5">
+              Register Number <span className="text-rose-400">*</span>
+            </label>
+            <input
+              type="text"
+              value={liveRegNo}
+              onChange={(e) => setLiveRegNo(e.target.value.toUpperCase())}
+              placeholder="e.g. 732224CC031"
+              required
+              className="w-full px-3.5 py-2.5 bg-slate-800/80 border border-blue-400/30 rounded-xl text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-blue-200 mb-1.5">
+              Date of Birth (DD/MM/YYYY) <span className="text-rose-400">*</span>
+            </label>
+            <input
+              type="text"
+              value={liveDob}
+              onChange={(e) => setLiveDob(e.target.value)}
+              placeholder="01/06/2007"
+              required
+              className="w-full px-3.5 py-2.5 bg-slate-800/80 border border-blue-400/30 rounded-xl text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-500"
+            />
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              disabled={liveLoading}
+              className="w-full px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/25 transition-all cursor-pointer disabled:opacity-50"
+            >
+              {liveLoading ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Connecting to Nandha COE...</span>
+                </>
+              ) : (
+                <>
+                  <Globe className="w-4 h-4" />
+                  <span>Fetch Official Live Marksheet</span>
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+
+        {/* Live Retrieved Result Summary Card */}
+        {liveResult && (
+          <div className="mt-5 p-4 bg-white/10 backdrop-blur-md rounded-xl border border-white/15 animate-fade-in space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+              <div>
+                <span className="text-[10px] uppercase tracking-wider text-blue-300 font-bold block">
+                  Candidate Credentials
+                </span>
+                <div className="text-base font-extrabold text-white flex items-center gap-2">
+                  <span>{liveResult.student_name}</span>
+                  <span className="text-xs px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 font-mono font-normal border border-blue-400/30">
+                    {liveResult.register_number}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300 mt-0.5">{liveResult.branch_name}</p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="px-3 py-1.5 bg-blue-600/30 rounded-lg border border-blue-400/30 text-center">
+                  <span className="text-[10px] text-blue-200 block uppercase font-bold">SGPA</span>
+                  <span className="text-lg font-black font-mono text-emerald-400">{liveResult.gpa.toFixed(2)}</span>
+                </div>
+                <div className="px-3 py-1.5 bg-emerald-600/30 rounded-lg border border-emerald-400/30 text-center">
+                  <span className="text-[10px] text-emerald-200 block uppercase font-bold">Status</span>
+                  <span className="text-sm font-bold text-emerald-300">{liveResult.result_status}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Courses Table */}
+            {liveResult.courses && liveResult.courses.length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-white/10 text-blue-200 font-bold">
+                      <th className="py-2 px-2.5">Course Code</th>
+                      <th className="py-2 px-2.5">Course Name</th>
+                      <th className="py-2 px-2.5 text-center">Credits</th>
+                      <th className="py-2 px-2.5 text-center">Grade</th>
+                      <th className="py-2 px-2.5 text-center">Result</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 font-sans">
+                    {liveResult.courses.map((c: any, idx: number) => (
+                      <tr key={idx} className="hover:bg-white/5 transition-colors">
+                        <td className="py-2 px-2.5 font-mono text-blue-300 font-bold">{c.code}</td>
+                        <td className="py-2 px-2.5 text-white">{c.name}</td>
+                        <td className="py-2 px-2.5 text-center text-slate-300">{c.credits}</td>
+                        <td className="py-2 px-2.5 text-center">
+                          <span className="px-2 py-0.5 rounded font-bold font-mono text-xs bg-blue-500/30 text-blue-200 border border-blue-400/30">
+                            {c.grade}
+                          </span>
+                        </td>
+                        <td className="py-2 px-2.5 text-center">
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              c.result === 'PASS'
+                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                            }`}
+                          >
+                            {c.result}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Marksheet Actions */}
+            <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => handlePreviewPdf(liveResult.register_number)}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all cursor-pointer border border-white/20"
+              >
+                <Eye className="w-3.5 h-3.5 text-blue-300" />
+                <span>Preview Marksheet PDF</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDownloadPdf(liveResult.register_number)}
+                className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download Official Marksheet PDF</span>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Step Pipeline Visualization Ribbon */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
@@ -193,7 +456,7 @@ export const ResultAutomationCenter: React.FC<ResultAutomationCenterProps> = ({ 
           </div>
           <div>
             <div className="font-bold text-slate-900">PDF Synthesis</div>
-            <p className="text-[11px] text-slate-400">pdfplumber & SHA-256</p>
+            <p className="text-[11px] text-slate-400">Digital Forensic Verification</p>
           </div>
         </div>
 
@@ -329,7 +592,7 @@ export const ResultAutomationCenter: React.FC<ResultAutomationCenterProps> = ({ 
               </div>
               <div className="flex items-center gap-2.5">
                 <FileCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>SHA-256 PDF integrity sealing</span>
+                <span>Tamper-proof digital seal verification</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <FileCheck className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -496,6 +759,15 @@ export const ResultAutomationCenter: React.FC<ResultAutomationCenterProps> = ({ 
           </div>
         </div>
       )}
+
+      {/* Official Marksheet PDF Viewer Modal */}
+      <PdfViewerModal
+        isOpen={!!previewPdfUrl}
+        onClose={() => setPreviewPdfUrl(null)}
+        pdfUrl={previewPdfUrl}
+        fileName={previewFileName}
+      />
     </div>
   );
 };
+

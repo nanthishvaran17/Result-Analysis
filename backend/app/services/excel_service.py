@@ -155,12 +155,15 @@ def apply_auto_column_widths(
                     max_len = len(first_line)
 
         if col_idx in compact_set:
-            ws.column_dimensions[col_letter].width = max(max_len + 3, 10)
+            # Compact subject grade columns: width 13 provides comfortable space for 6-char code + filter arrow
+            ws.column_dimensions[col_letter].width = 13
         elif col_idx == 1:
             ws.column_dimensions[col_letter].width = max(max_len + 3, 7)
+        elif col_idx == 2:
+            ws.column_dimensions[col_letter].width = 18
         else:
-            calculated = max_len + 4
-            ws.column_dimensions[col_letter].width = min(max(calculated, 11), max_width_cap)
+            calculated = max_len + 6  # Extra breathing room for AutoFilter dropdown buttons
+            ws.column_dimensions[col_letter].width = min(max(calculated, 16), max_width_cap)
 
 
 def apply_conditional_formatting_rules(ws, start_row: int, end_row: int, start_col: int, end_col: int) -> None:
@@ -255,10 +258,15 @@ def build_result_analysis_sheet(ws, matrix):
     ws["A3"].fill = fill_header
     ws["A3"].alignment = align_center
 
+    # Style entire banner block (Rows 1 to 4) uniformly with fill_header so no visual line gap appears
+    for r in range(1, 5):
+        for c in range(1, total_cols + 1):
+            ws.cell(row=r, column=c).fill = fill_header
+
     ws.row_dimensions[1].height = 26
     ws.row_dimensions[2].height = 20
     ws.row_dimensions[3].height = 18
-    ws.row_dimensions[4].height = 10  # Visual buffer row
+    ws.row_dimensions[4].height = 6   # Seamless bottom buffer of dark banner
 
     # Row 5: Table Header
     header_row = 5

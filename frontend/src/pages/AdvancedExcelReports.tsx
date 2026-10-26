@@ -116,7 +116,7 @@ export const AdvancedExcelReports: React.FC<AdvancedExcelReportsProps> = ({ acti
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                openpyxl Enterprise Engine
+                Autonomous COE Ledger Engine
               </span>
               <span className="text-slate-400 text-xs">• 5 Synchronized Sheets</span>
             </div>
@@ -139,7 +139,7 @@ export const AdvancedExcelReports: React.FC<AdvancedExcelReportsProps> = ({ acti
           </div>
           <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Formula-Driven openpyxl</span>
+            <span>Formula-Calculated Official Ledger</span>
           </span>
         </div>
 

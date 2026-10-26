@@ -190,8 +190,22 @@ def process_single_student(
 
         # Replace subject results idempotently
         db.query(SubjectResult).filter(SubjectResult.student_result_id == student_res.id).delete()
+        subject_cache = {s.code: s for s in db.query(Subject).all()}
         for item in subject_results_data:
-            sub = item["subject_obj"]
+            code = item["code"]
+            sub = item.get("subject_obj") or subject_cache.get(code)
+            if not sub:
+                sub = Subject(
+                    code=code,
+                    name=item.get("name", code),
+                    department_code=student.department_code,
+                    semester=student.current_semester,
+                    credits=item.get("credits", 3)
+                )
+                db.add(sub)
+                db.flush()
+                subject_cache[code] = sub
+
             sr = SubjectResult(
                 student_result_id=student_res.id,
                 subject_id=sub.id,

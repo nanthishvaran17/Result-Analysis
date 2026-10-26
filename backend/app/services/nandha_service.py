@@ -279,11 +279,24 @@ def import_or_update_live_result(
         db.commit()
 
     # 3. Ensure Exam Session
-    exam_session = db.query(ExamSession).filter(ExamSession.id == session_id).first()
+    exam_session = db.query(ExamSession).filter(ExamSession.id == session_id).first() if session_id else None
     if not exam_session:
         exam_session = db.query(ExamSession).filter(ExamSession.is_active == True).first()
+    if not exam_session:
+        exam_session = db.query(ExamSession).order_by(ExamSession.id.desc()).first()
+    if not exam_session:
+        exam_session = ExamSession(
+            session_code="NOV_DEC_2025",
+            academic_year="2025-2026",
+            semester_type="ODD",
+            is_active=True
+        )
+        db.add(exam_session)
+        db.commit()
+        db.refresh(exam_session)
 
-    # 4. Ensure Subjects exist in master table
+    # 4. Ensure Subjects exist in master table & cache by code
+    subject_map = {}
     for c in live_data["courses"]:
         sub = db.query(Subject).filter(Subject.code == c["code"]).first()
         if not sub:
@@ -295,12 +308,15 @@ def import_or_update_live_result(
                 credits=c["credits"]
             )
             db.add(sub)
-    db.commit()
+            db.commit()
+            db.refresh(sub)
+        subject_map[c["code"]] = sub
 
     # 5. Create or Update StudentResult
     existing_res = db.query(StudentResult).filter(
         StudentResult.student_id == student.id,
-        StudentResult.session_id == exam_session.id
+        StudentResult.session_id == exam_session.id,
+        StudentResult.semester == student.current_semester
     ).first()
 
     if existing_res:
@@ -308,7 +324,8 @@ def import_or_update_live_result(
         existing_res.earned_credits = live_data["earned_credits"]
         existing_res.gpa = live_data["gpa"]
         existing_res.result_status = live_data["result_status"]
-        existing_res.standing_arrears = live_data["arrears_count"]
+        existing_res.arrears_count = live_data["arrears_count"]
+        existing_res.standing_arrears_count = live_data["arrears_count"]
         existing_res.is_verified = True
         existing_res.verified_at = datetime.now(timezone.utc)
         student_res = existing_res
@@ -320,11 +337,13 @@ def import_or_update_live_result(
         student_res = StudentResult(
             student_id=student.id,
             session_id=exam_session.id,
+            semester=student.current_semester,
             total_credits=live_data["total_credits"],
             earned_credits=live_data["earned_credits"],
             gpa=live_data["gpa"],
             result_status=live_data["result_status"],
-            standing_arrears=live_data["arrears_count"],
+            arrears_count=live_data["arrears_count"],
+            standing_arrears_count=live_data["arrears_count"],
             is_verified=True,
             verified_at=datetime.now(timezone.utc)
         )
@@ -334,15 +353,17 @@ def import_or_update_live_result(
 
     # 6. Insert Subject Results
     for c in live_data["courses"]:
-        sr = SubjectResult(
-            student_result_id=student_res.id,
-            subject_code=c["code"],
-            subject_name=c["name"],
-            credits=c["credits"],
-            grade=c["grade"],
-            result=c["result"]
-        )
-        db.add(sr)
+        sub_obj = subject_map.get(c["code"])
+        if sub_obj:
+            sr = SubjectResult(
+                student_result_id=student_res.id,
+                subject_id=sub_obj.id,
+                grade=c["grade"],
+                result_status=c["result"],
+                credits=c["credits"],
+                is_arrear=(c["result"] != "PASS")
+            )
+            db.add(sr)
     db.commit()
 
     # 7. Generate Authentic Marksheet PDF & Verify

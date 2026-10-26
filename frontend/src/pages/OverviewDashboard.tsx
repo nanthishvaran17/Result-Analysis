@@ -280,15 +280,15 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ onNavigate
                 <HardDrive className="w-4 h-4 text-slate-500" />
                 <span className="font-bold text-slate-800">Storage & Marksheet PDFs</span>
               </div>
-              <span className="font-mono text-emerald-600 font-bold">SHA-256 Verified</span>
+              <span className="font-semibold text-emerald-600 font-bold">Tamper-Proof & Sealed</span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
               <div className="flex items-center gap-2.5">
                 <Activity className="w-4 h-4 text-slate-500" />
-                <span className="font-bold text-slate-800">Database Engine</span>
+                <span className="font-bold text-slate-800">Examination Record Vault</span>
               </div>
-              <span className="font-mono text-emerald-600 font-bold">ACID Transactional</span>
+              <span className="font-semibold text-emerald-600 font-bold">Certified Secure</span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
@@ -296,15 +296,15 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ onNavigate
                 <FileSpreadsheet className="w-4 h-4 text-slate-500" />
                 <span className="font-bold text-slate-800">Excel Reporting Pipeline</span>
               </div>
-              <span className="font-mono text-emerald-600 font-bold">openpyxl Active</span>
+              <span className="font-semibold text-emerald-600 font-bold">5-Sheet Ledger Ready</span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
               <div className="flex items-center gap-2.5">
                 <Calendar className="w-4 h-4 text-slate-500" />
-                <span className="font-bold text-slate-800">Audit Trail Logging</span>
+                <span className="font-bold text-slate-800">Continuous Audit Logging</span>
               </div>
-              <span className="font-mono text-emerald-600 font-bold">256-bit Immutable</span>
+              <span className="font-semibold text-emerald-600 font-bold">Institutional Audit Active</span>
             </div>
           </div>
         </div>

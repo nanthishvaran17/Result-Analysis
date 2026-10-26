@@ -19,7 +19,8 @@ import {
   GraduationCap,
   Filter,
   RotateCcw,
-  X
+  X,
+  FileText
 } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
@@ -27,6 +28,7 @@ import { useToast } from '../context/ToastContext';
 import { useDossier } from '../context/DossierContext';
 import { Modal } from '../components/Modal';
 import { CustomDropdown, type DropdownOption } from '../components/CustomDropdown';
+import { PdfViewerModal } from '../components/PdfViewerModal';
 import type {
   ResultMatrix,
   Department,
@@ -175,9 +177,32 @@ export const ResultAnalysis: React.FC<ResultAnalysisProps> = ({ activeSessionId,
     }
   };
 
+  const [previewPdfUrl, setPreviewPdfUrl] = useState<string | null>(null);
+  const [previewFileName, setPreviewFileName] = useState('');
+
+  const handlePreviewPdf = (regNo: string) => {
+    const token = localStorage.getItem('token');
+    const sessCode = matrix?.session_code || rankRemedialData?.session_code || 'NOV_DEC_2025';
+    const filename = `${regNo}_${sessCode}.pdf`;
+
+    fetch(`/api/v1/pdfs/download/${filename}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Official PDF marksheet not yet generated for this student.');
+        return res.blob();
+      })
+      .then((blob) => {
+        const url = window.URL.createObjectURL(blob);
+        setPreviewPdfUrl(url);
+        setPreviewFileName(filename);
+      })
+      .catch((err) => toastError(err.message));
+  };
+
   const handleDownloadPdf = (regNo: string) => {
     const token = localStorage.getItem('token');
-    const sessCode = matrix?.session_code || rankRemedialData?.session_code || 'SESSION';
+    const sessCode = matrix?.session_code || rankRemedialData?.session_code || 'NOV_DEC_2025';
     const filename = `${regNo}_${sessCode}.pdf`;
 
     fetch(`/api/v1/pdfs/download/${filename}`, {
@@ -485,60 +510,76 @@ export const ResultAnalysis: React.FC<ResultAnalysisProps> = ({ activeSessionId,
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
           {/* Candidate / Course Live Search Input */}
-          <div className="md:col-span-5 relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search candidate name, register number (7100...), or course..."
-              className="w-full pl-10 pr-9 py-2.5 text-xs bg-slate-50/70 border border-slate-200 rounded-xl focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 font-medium transition-all"
-            />
-            {search && (
-              <button
-                onClick={() => setSearch('')}
-                className="p-1 text-slate-400 hover:text-slate-600 absolute right-2.5 top-2.5 cursor-pointer"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
+          <div className="lg:col-span-5">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+              Live Search Candidate / Course
+            </label>
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search candidate name, register number (7100...), or course..."
+                className="w-full pl-10 pr-9 h-10 text-xs bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 font-medium transition-all"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  className="p-1 text-slate-400 hover:text-slate-600 absolute right-2.5 top-2.5 rounded-md hover:bg-slate-200/60 cursor-pointer"
+                  title="Clear Search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Department Custom Dropdown */}
-          <div className="md:col-span-3">
+          <div className="lg:col-span-3">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+              Academic Department
+            </label>
             <CustomDropdown
-              label="Academic Department"
               icon={Building2}
               options={departmentOptions}
               value={selectedDept}
               onChange={(val) => setSelectedDept(val)}
-              minWidth="min-w-[320px]"
+              minWidth="min-w-full"
+              size="sm"
             />
           </div>
 
           {/* Academic Batch Custom Dropdown */}
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+              Batch Cohort
+            </label>
             <CustomDropdown
-              label="Academic Batch"
               icon={Calendar}
               options={batchOptions}
               value={selectedBatch}
               onChange={(val) => setSelectedBatch(val)}
-              minWidth="min-w-[200px]"
+              minWidth="min-w-full"
+              size="sm"
             />
           </div>
 
           {/* Semester Custom Dropdown */}
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+              Semester
+            </label>
             <CustomDropdown
-              label="Examination Semester"
               icon={GraduationCap}
               options={semesterOptions}
               value={selectedSemester}
               onChange={(val) => setSelectedSemester(val)}
-              minWidth="min-w-[200px]"
+              minWidth="min-w-full"
+              size="sm"
             />
           </div>
         </div>
@@ -753,6 +794,14 @@ export const ResultAnalysis: React.FC<ResultAnalysisProps> = ({ activeSessionId,
                             >
                               <Eye className="w-3 h-3 text-blue-600" />
                               <span>Inspect</span>
+                            </button>
+                            <button
+                              onClick={() => handlePreviewPdf(row.register_number)}
+                              title="Preview Official Marksheet PDF"
+                              className="flex items-center gap-1 px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-[10px] font-bold transition-all cursor-pointer border border-blue-200 shadow-2xs"
+                            >
+                              <FileText className="w-3 h-3 text-blue-600" />
+                              <span>PDF</span>
                             </button>
                             {row.is_verified ? (
                               <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200">
@@ -1420,15 +1469,22 @@ export const ResultAnalysis: React.FC<ResultAnalysisProps> = ({ activeSessionId,
               </div>
               <div className="flex items-center gap-2">
                 <button
+                  onClick={() => handlePreviewPdf(inspectedRow.register_number)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl font-bold border border-blue-200 transition-all cursor-pointer text-xs"
+                >
+                  <Eye className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Preview PDF</span>
+                </button>
+                <button
                   onClick={() => handleDownloadPdf(inspectedRow.register_number)}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold transition-all shadow-sm cursor-pointer"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold transition-all shadow-sm cursor-pointer text-xs"
                 >
                   <Download className="w-3.5 h-3.5 text-blue-400" />
                   <span>Download Official PDF</span>
                 </button>
                 <button
                   onClick={() => setInspectedRow(null)}
-                  className="px-3.5 py-1.5 border border-slate-300 rounded-xl text-slate-600 font-bold hover:bg-slate-50 cursor-pointer"
+                  className="px-3.5 py-1.5 border border-slate-300 rounded-xl text-slate-600 font-bold hover:bg-slate-50 cursor-pointer text-xs"
                 >
                   Close
                 </button>
@@ -1437,6 +1493,15 @@ export const ResultAnalysis: React.FC<ResultAnalysisProps> = ({ activeSessionId,
           </div>
         )}
       </Modal>
+
+      {/* Official Marksheet PDF Viewer Modal */}
+      <PdfViewerModal
+        isOpen={!!previewPdfUrl}
+        onClose={() => setPreviewPdfUrl(null)}
+        pdfUrl={previewPdfUrl}
+        fileName={previewFileName}
+      />
     </div>
   );
 };
+

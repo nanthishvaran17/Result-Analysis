@@ -802,35 +802,43 @@ export const StudentRegistry: React.FC = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
               {/* Search Form */}
-              <form onSubmit={handleSearchSubmit} className="md:col-span-5 relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search register number or candidate name..."
-                  className="w-full pl-10 pr-9 py-2.5 text-xs bg-slate-50/70 border border-slate-200 rounded-xl focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 font-medium transition-all"
-                />
-                {search && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSearch('');
-                      setPage(1);
-                    }}
-                    className="p-1 text-slate-400 hover:text-slate-600 absolute right-2.5 top-2.5 cursor-pointer"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </form>
+              <div className="lg:col-span-5">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                  Live Search Candidate / Register No
+                </label>
+                <form onSubmit={handleSearchSubmit} className="relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search register number or candidate name..."
+                    className="w-full pl-10 pr-9 h-10 text-xs bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 font-medium transition-all"
+                  />
+                  {search && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearch('');
+                        setPage(1);
+                      }}
+                      className="p-1 text-slate-400 hover:text-slate-600 absolute right-2.5 top-2.5 rounded-md hover:bg-slate-200/60 cursor-pointer"
+                      title="Clear Search"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </form>
+              </div>
 
               {/* Department Dropdown */}
-              <div className="md:col-span-3">
+              <div className="lg:col-span-3">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                  Department
+                </label>
                 <CustomDropdown
-                  label="Department"
                   icon={Building2}
                   options={departmentOptions}
                   value={selectedDept}
@@ -838,14 +846,17 @@ export const StudentRegistry: React.FC = () => {
                     setSelectedDept(val);
                     setPage(1);
                   }}
-                  minWidth="min-w-[320px]"
+                  minWidth="min-w-full"
+                  size="sm"
                 />
               </div>
 
               {/* Batch Dropdown */}
-              <div className="md:col-span-2">
+              <div className="lg:col-span-2">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                  Batch
+                </label>
                 <CustomDropdown
-                  label="Batch"
                   icon={Calendar}
                   options={batchOptions}
                   value={selectedBatch}
@@ -853,14 +864,17 @@ export const StudentRegistry: React.FC = () => {
                     setSelectedBatch(val);
                     setPage(1);
                   }}
-                  minWidth="min-w-[200px]"
+                  minWidth="min-w-full"
+                  size="sm"
                 />
               </div>
 
               {/* Semester Dropdown */}
-              <div className="md:col-span-2">
+              <div className="lg:col-span-2">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                  Semester
+                </label>
                 <CustomDropdown
-                  label="Semester"
                   icon={GraduationCap}
                   options={semesterOptions}
                   value={selectedSemester}
@@ -868,7 +882,8 @@ export const StudentRegistry: React.FC = () => {
                     setSelectedSemester(val);
                     setPage(1);
                   }}
-                  minWidth="min-w-[200px]"
+                  minWidth="min-w-full"
+                  size="sm"
                 />
               </div>
             </div>
