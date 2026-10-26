@@ -101,18 +101,6 @@ export const Login: React.FC = () => {
     setError(null);
   };
 
-  const handleOtpChange = (index: number, val: string) => {
-    if (val.length > 1) val = val[0];
-    const newCode = [...otpCode];
-    newCode[index] = val;
-    setOtpCode(newCode);
-
-    // Auto focus next box
-    if (val && index < 5) {
-      const nextInput = document.getElementById(`otp-input-${index + 1}`);
-      nextInput?.focus();
-    }
-  };
 
   return (
     <div className="h-screen max-h-screen w-full flex flex-col lg:flex-row bg-[#0f172a] text-slate-900 font-sans selection:bg-sky-500 selection:text-white overflow-hidden">
@@ -349,158 +337,87 @@ export const Login: React.FC = () => {
           )}
 
           {/* FORM */}
-          <form onSubmit={handleSubmit} className="space-y-2.5">
-            {authMode === 'password' ? (
-              <>
-                {/* Email / Username Field */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Institutional Email or User ID
-                  </label>
-                  <div className="relative flex items-center">
-                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
-                    <input
-                      type="text"
-                      id="username-input"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="username or email"
-                      required
-                      className="w-full pl-10 pr-3.5 py-2 rounded-xl border border-slate-300 bg-white focus:bg-white text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0072b2] focus:border-[#0072b2] shadow-2xs transition"
-                    />
-                  </div>
-                </div>
-
-                {/* Password Field */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Password
-                  </label>
-                  <div className="relative flex items-center">
-                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      id="password-input"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      required
-                      className="w-full pl-10 pr-10 py-2 rounded-xl border border-slate-300 bg-white focus:bg-white text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0072b2] focus:border-[#0072b2] shadow-2xs transition"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 text-slate-400 hover:text-slate-600 p-0.5 focus:outline-none cursor-pointer"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Checkbox & Forgot Password */}
-                <div className="flex items-center justify-between text-xs pt-0.5">
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded border-slate-300 text-[#0072b2] focus:ring-[#0072b2] accent-[#0072b2]"
-                    />
-                    <span className="text-slate-600 font-medium">Remember me</span>
-                  </label>
-
-                  <button
-                    type="button"
-                    onClick={() => setShowForgotModal(true)}
-                    className="text-[#0072b2] hover:text-[#005a8e] font-semibold hover:underline cursor-pointer"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-              </>
-            ) : (
-              /* SECURE OTP FLOW */
-              <div className="space-y-2.5">
-                {!otpSent ? (
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Registered Institutional Email or Mobile
-                    </label>
-                    <div className="relative flex items-center">
-                      <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
-                      <input
-                        type="text"
-                        value={otpPhone}
-                        onChange={(e) => setOtpPhone(e.target.value)}
-                        placeholder="staff@nandhaengg.org or +91 98427..."
-                        required
-                        className="w-full pl-10 pr-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0072b2] focus:border-[#0072b2] shadow-2xs transition"
-                      />
-                    </div>
-                    <p className="text-[10.5px] text-slate-500 mt-1">
-                      A 6-digit authentication token will be dispatched via institutional SMTP/SMS.
-                    </p>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-bold text-slate-700">
-                        Enter 6-Digit One-Time Password
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOtpSent(false);
-                          setOtpCode(['', '', '', '', '', '']);
-                        }}
-                        className="text-[11px] text-[#0072b2] font-semibold hover:underline cursor-pointer"
-                      >
-                        Change recipient
-                      </button>
-                    </div>
-
-                    <div className="flex justify-between gap-1.5 my-2">
-                      {otpCode.map((digit, idx) => (
-                        <input
-                          key={idx}
-                          id={`otp-input-${idx}`}
-                          type="text"
-                          maxLength={1}
-                          value={digit}
-                          onChange={(e) => handleOtpChange(idx, e.target.value)}
-                          className="w-10 h-10 text-center text-base font-bold rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-[#0072b2] focus:border-[#0072b2] outline-none shadow-2xs"
-                        />
-                      ))}
-                    </div>
-                    <p className="text-[10.5px] text-emerald-600 font-medium flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      Token sent to <strong>{otpPhone}</strong> (Demo: any 6 digits).
-                    </p>
-                  </div>
-                )}
+          <form onSubmit={handleSubmit} className="space-y-3">
+            {/* Email / Username Field */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Institutional Email or User ID
+              </label>
+              <div className="relative flex items-center">
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
+                <input
+                  type="text"
+                  id="username-input"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="username or email"
+                  required
+                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:bg-white text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0072b2] focus:border-[#0072b2] shadow-2xs transition"
+                />
               </div>
-            )}
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Password
+              </label>
+              <div className="relative flex items-center">
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password-input"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-300 bg-white focus:bg-white text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0072b2] focus:border-[#0072b2] shadow-2xs transition"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 text-slate-400 hover:text-slate-600 p-0.5 focus:outline-none cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Checkbox & Forgot Password */}
+            <div className="flex items-center justify-between text-xs pt-0.5">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-300 text-[#0072b2] focus:ring-[#0072b2] accent-[#0072b2]"
+                />
+                <span className="text-slate-600 font-medium">Remember me</span>
+              </label>
+
+              <button
+                type="button"
+                onClick={() => setShowForgotModal(true)}
+                className="text-[#0072b2] hover:text-[#005a8e] font-semibold hover:underline cursor-pointer"
+              >
+                Forgot password?
+              </button>
+            </div>
 
             {/* Primary Action Button */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full mt-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#0072b2] to-[#005a8e] hover:from-[#005f96] hover:to-[#004e7c] active:scale-[0.99] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md shadow-sky-900/15 hover:shadow-lg transition-all cursor-pointer disabled:opacity-70"
+              className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-[#0072b2] to-[#005a8e] hover:from-[#005f96] hover:to-[#004e7c] active:scale-[0.99] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md shadow-sky-900/15 hover:shadow-lg transition-all cursor-pointer disabled:opacity-70"
             >
               {isSubmitting ? (
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Verifying identity...</span>
+                  <span>Authenticating...</span>
                 </div>
               ) : (
                 <>
-                  <span>
-                    {authMode === 'password'
-                      ? 'Sign In'
-                      : otpSent
-                      ? 'Verify & Sign In'
-                      : 'Send Verification OTP'}
-                  </span>
+                  <span>Sign In to Workspace</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
