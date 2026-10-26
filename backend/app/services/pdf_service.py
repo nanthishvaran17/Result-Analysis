@@ -159,12 +159,17 @@ def generate_marksheet_pdf(
         title = str(sub.get("name", sub.get("title", ""))).strip()
         cr = int(sub.get("credits", 3))
         grade = str(sub.get("grade", "")).strip().upper()
-        res = "PASS" if grade in ["O", "A+", "A", "B+", "B", "C"] else "RA"
+        res = str(sub.get("result", "")).strip().upper()
+        if not res:
+            res = "PASS" if grade in ["O", "A+", "A", "B+", "B", "C+", "C", "VG", "G", "SF"] else "RA"
 
-        total_credits += cr
-        if res == "PASS":
-            earned_credits += cr
-        else:
+        if cr > 0:
+            total_credits += cr
+            if res == "PASS":
+                earned_credits += cr
+            else:
+                has_arrear = True
+        elif res != "PASS":
             has_arrear = True
 
         result_table_data.append([

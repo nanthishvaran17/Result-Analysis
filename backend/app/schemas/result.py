@@ -119,3 +119,9 @@ class SubjectPerformanceResponse(BaseModel):
     subjects: List[SubjectPerformanceItem]
     overall_pass_percentage: float
 
+class LiveFetchRequest(BaseModel):
+    register_number: str
+    dob: str
+    session_id: Optional[int] = None
+
+

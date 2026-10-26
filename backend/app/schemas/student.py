@@ -17,6 +17,7 @@ class StudentBase(BaseModel):
     batch: str
     current_semester: int
     section: str = "A"
+    dob: Optional[str] = None
     email: Optional[EmailStr] = None
 
 class StudentCreate(StudentBase):
@@ -28,6 +29,7 @@ class StudentUpdate(BaseModel):
     batch: Optional[str] = None
     current_semester: Optional[int] = None
     section: Optional[str] = None
+    dob: Optional[str] = None
     email: Optional[EmailStr] = None
     is_active: Optional[bool] = None
 

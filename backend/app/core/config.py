@@ -35,8 +35,8 @@ class Settings(BaseSettings):
     UPLOADS_DIR: Path = UPLOADS_DIR
     
     # Institution Info
-    INSTITUTION_NAME: str = "College of Engineering & Technology"
-    INSTITUTION_CODE: str = "AUTONOMOUS-7100"
+    INSTITUTION_NAME: str = "NANDHA ENGINEERING COLLEGE (AUTONOMOUS)"
+    INSTITUTION_CODE: str = "7322"
     
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = [

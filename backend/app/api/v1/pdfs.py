@@ -97,3 +97,62 @@ def download_pdf(
         media_type="application/pdf",
         filename=pdf.file_name
     )
+
+@router.get("/download/{filename}")
+def download_pdf_by_filename(
+    filename: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    storage_root = settings.PDF_DIR.resolve()
+    clean_filename = Path(filename).name
+    file_path = (storage_root / clean_filename).resolve()
+
+    if not str(file_path).startswith(str(storage_root)):
+        raise HTTPException(status_code=403, detail="Forbidden file access")
+
+    if not file_path.exists():
+        # Attempt auto-generation from database records
+        # Pattern: {reg_no}_{session_code}.pdf
+        stem = Path(clean_filename).stem
+        parts = stem.split("_")
+        if len(parts) >= 2:
+            reg_no = parts[0]
+            session_code = "_".join(parts[1:])
+            from app.models.session import ExamSession
+            from app.models.result import StudentResult, SubjectResult
+            from app.services.pdf_service import generate_marksheet_pdf, verify_and_store_pdf
+
+            student = db.query(Student).filter(Student.register_number == reg_no).first()
+            session_obj = db.query(ExamSession).filter(ExamSession.session_code == session_code).first()
+            if not session_obj:
+                session_obj = db.query(ExamSession).filter(ExamSession.is_active == True).first()
+
+            if student and session_obj:
+                res = db.query(StudentResult).filter(
+                    StudentResult.student_id == student.id,
+                    StudentResult.session_id == session_obj.id
+                ).first()
+                if res and res.subject_results:
+                    sub_list = [
+                        {
+                            "code": sr.subject_code,
+                            "name": sr.subject_name,
+                            "credits": sr.credits,
+                            "grade": sr.grade,
+                            "result": sr.result
+                        }
+                        for sr in res.subject_results
+                    ]
+                    gen_path = generate_marksheet_pdf(student, session_obj, sub_list, str(file_path))
+                    verify_and_store_pdf(db, gen_path, student.id, session_obj.id, student.register_number)
+
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail=f"Mark sheet PDF '{clean_filename}' not found.")
+
+    return FileResponse(
+        path=str(file_path),
+        media_type="application/pdf",
+        filename=clean_filename
+    )

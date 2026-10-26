@@ -23,6 +23,7 @@ class Student(Base):
     batch = Column(String(20), nullable=False, index=True)  # e.g., 2022-2026
     current_semester = Column(Integer, nullable=False)  # 1 to 8
     section = Column(String(5), default="A", nullable=False)
+    dob = Column(String(20), nullable=True)  # DD/MM/YYYY for COE portal sync
     email = Column(String(100), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)

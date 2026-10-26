@@ -997,6 +997,30 @@ def validate_generated_workbook(file_path: str, expected_sheets: List[str]) -> T
         return False, f"Workbook verification failed: {str(e)}"
 
 
+def inject_ignored_errors_to_workbook_file(file_path: str) -> None:
+    """
+    Injects SpreadsheetML <ignoredErrors> elements into the saved .xlsx ZIP archive
+    to permanently remove Excel's 'Number Stored as Text' green triangle warnings on register numbers
+    while preserving the strict text format '@'.
+    """
+    import zipfile
+    import os
+
+    temp_path = file_path + ".tmp"
+    with zipfile.ZipFile(file_path, "r") as zin, zipfile.ZipFile(temp_path, "w", zipfile.ZIP_DEFLATED) as zout:
+        for item in zin.infolist():
+            data = zin.read(item.filename)
+            if item.filename.startswith("xl/worksheets/sheet") and item.filename.endswith(".xml"):
+                xml_str = data.decode("utf-8")
+                if "</worksheet>" in xml_str and "<ignoredErrors>" not in xml_str:
+                    ignored_block = '<ignoredErrors><ignoredError sqref="A4:C5000" numberStoredAsText="1"/></ignoredErrors></worksheet>'
+                    xml_str = xml_str.replace("</worksheet>", ignored_block)
+                    data = xml_str.encode("utf-8")
+            zout.writestr(item, data)
+
+    os.replace(temp_path, file_path)
+
+
 def generate_enterprise_excel_report(
     db: Session,
     session_id: int,
@@ -1064,6 +1088,7 @@ def generate_enterprise_excel_report(
     file_path = str(settings.REPORTS_DIR / filename)
 
     wb.save(file_path)
+    inject_ignored_errors_to_workbook_file(file_path)
 
     # Validation
     expected_sheets = ["Result Analysis", "Summary", "Arrear Analysis", "Processing Log", "Subject Mapping"]

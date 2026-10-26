@@ -143,3 +143,59 @@ def verify_result(
         user_id=current_user.id
     )
     return {"message": "Result verified successfully", "is_verified": True}
+
+@router.post("/live-fetch")
+def live_fetch_coe_result(
+    payload: dict,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    from app.services.nandha_service import fetch_live_coe_result, import_or_update_live_result
+
+    reg_no = payload.get("register_number", "").strip().upper()
+    dob = payload.get("dob", "").strip()
+    session_id = payload.get("session_id")
+
+    if not reg_no or not dob:
+        raise HTTPException(status_code=400, detail="Register number and Date of Birth (DD/MM/YYYY) are required.")
+
+    resolved_session_id = resolve_session_id(session_id, db)
+
+    try:
+        live_data = fetch_live_coe_result(reg_no, dob)
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to communicate with Nandha COE portal: {str(e)}")
+
+    # Import into DB
+    res_obj = import_or_update_live_result(db, live_data, resolved_session_id)
+
+    client_ip = request.client.host if request.client else "unknown"
+    log_audit(
+        db=db,
+        username=current_user.username,
+        action="LIVE_COE_FETCH",
+        target_entity="StudentResult",
+        target_id=str(res_obj.id),
+        details=f"Retrieved live result for {reg_no} from Nandha COE portal",
+        ip_address=client_ip,
+        user_id=current_user.id
+    )
+
+    return {
+        "success": True,
+        "message": f"Successfully retrieved authentic marksheet for {live_data['student_name']} ({reg_no}) from Nandha COE portal.",
+        "student_name": live_data["student_name"],
+        "register_number": live_data["register_number"],
+        "branch_name": live_data["branch_name"],
+        "gpa": live_data["gpa"],
+        "total_credits": live_data["total_credits"],
+        "earned_credits": live_data["earned_credits"],
+        "result_status": live_data["result_status"],
+        "arrears_count": live_data["arrears_count"],
+        "courses": live_data["courses"],
+        "result_id": res_obj.id
+    }
+
