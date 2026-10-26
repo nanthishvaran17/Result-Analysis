@@ -5,11 +5,16 @@ import {
   CheckCircle2,
   AlertTriangle,
   Layers,
-  Sparkles
+  Sparkles,
+  Building2,
+  Calendar,
+  GraduationCap,
+  Clock
 } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { CustomDropdown } from '../components/CustomDropdown';
 import type { ExcelReportItem, ExamSession, Department } from '../types';
 
 interface AdvancedExcelReportsProps {
@@ -140,63 +145,68 @@ export const AdvancedExcelReports: React.FC<AdvancedExcelReportsProps> = ({ acti
 
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
           <div>
-            <label className="block font-bold text-slate-700 mb-1.5">Examination Session *</label>
-            <select
+            <CustomDropdown
+              label="Examination Session"
+              icon={Clock}
+              options={sessions.map((s) => ({
+                value: s.id,
+                label: s.session_code,
+                badge: s.is_active ? 'Active' : undefined,
+                sublabel: s.session_name
+              }))}
               value={selectedSession}
-              onChange={(e) => setSelectedSession(Number(e.target.value))}
-              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-600 cursor-pointer"
-            >
-              <option value="">Select Session</option>
-              {sessions.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.session_code} {s.is_active ? '(Active)' : ''}
-                </option>
-              ))}
-            </select>
+              onChange={(val: any) => setSelectedSession(val)}
+              minWidth="min-w-[240px]"
+            />
           </div>
 
           <div>
-            <label className="block font-bold text-slate-700 mb-1.5">Department</label>
-            <select
+            <CustomDropdown
+              label="Department Cohort"
+              icon={Building2}
+              options={[
+                { value: '', label: 'All Departments', badge: 'ALL' },
+                ...departments.map((d) => ({
+                  value: d.code,
+                  label: `${d.code} - ${d.name}`,
+                  badge: d.code,
+                  sublabel: d.name
+                }))
+              ]}
               value={selectedDept}
-              onChange={(e) => setSelectedDept(e.target.value)}
-              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-600 cursor-pointer"
-            >
-              <option value="">All Departments</option>
-              {departments.map((d) => (
-                <option key={d.code} value={d.code}>
-                  {d.code} - {d.name}
-                </option>
-              ))}
-            </select>
+              onChange={(val: any) => setSelectedDept(val)}
+              minWidth="min-w-[300px]"
+            />
           </div>
 
           <div>
-            <label className="block font-bold text-slate-700 mb-1.5">Batch</label>
-            <select
+            <CustomDropdown
+              label="Graduation Batch"
+              icon={Calendar}
+              options={[
+                { value: '2022-2026', label: 'Batch 2022-2026', badge: '22-26' },
+                { value: '2023-2027', label: 'Batch 2023-2027', badge: '23-27' },
+                { value: '2024-2028', label: 'Batch 2024-2028', badge: '24-28' },
+              ]}
               value={selectedBatch}
-              onChange={(e) => setSelectedBatch(e.target.value)}
-              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-600 cursor-pointer"
-            >
-              <option value="2022-2026">2022-2026</option>
-              <option value="2023-2027">2023-2027</option>
-              <option value="2024-2028">2024-2028</option>
-            </select>
+              onChange={(val: any) => setSelectedBatch(val)}
+              minWidth="min-w-[180px]"
+            />
           </div>
 
           <div>
-            <label className="block font-bold text-slate-700 mb-1.5">Semester</label>
-            <select
+            <CustomDropdown
+              label="Curriculum Semester"
+              icon={GraduationCap}
+              options={[1, 2, 3, 4, 5, 6, 7, 8].map((s) => ({
+                value: s,
+                label: `Semester ${s}`,
+                badge: `SEM ${s}`
+              }))}
               value={selectedSemester}
-              onChange={(e) => setSelectedSemester(Number(e.target.value))}
-              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-600 cursor-pointer"
-            >
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
-                <option key={s} value={s}>
-                  Semester {s}
-                </option>
-              ))}
-            </select>
+              onChange={(val: any) => setSelectedSemester(val)}
+              minWidth="min-w-[180px]"
+            />
           </div>
         </div>
 

@@ -11,6 +11,7 @@ interface TopbarProps {
   onRefresh: () => void;
   isRefreshing?: boolean;
   onOpenSearch?: () => void;
+  onRequestSignOut?: () => void;
 }
 
 export const Topbar: React.FC<TopbarProps> = ({
@@ -21,6 +22,7 @@ export const Topbar: React.FC<TopbarProps> = ({
   onRefresh,
   isRefreshing,
   onOpenSearch,
+  onRequestSignOut,
 }) => {
   const { user, logout } = useAuth();
 
@@ -86,13 +88,14 @@ export const Topbar: React.FC<TopbarProps> = ({
           <span>{user?.role || 'EXAM_STAFF'}</span>
         </div>
 
-        {/* Logout */}
+        {/* Sign Out Button */}
         <button
-          onClick={logout}
+          onClick={onRequestSignOut || logout}
           className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-xl border border-rose-200 transition-all cursor-pointer shadow-2xs active:scale-95"
+          title="Sign out of portal"
         >
           <LogOut className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Logout</span>
+          <span className="hidden sm:inline">Sign Out</span>
         </button>
       </div>
     </header>
