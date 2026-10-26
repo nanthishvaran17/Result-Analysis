@@ -38,8 +38,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
   return (
     <aside className="w-68 bg-slate-950 text-white flex flex-col border-r border-slate-800/80 select-none shadow-2xl relative z-30">
       {/* Brand Header */}
-      <div className="h-17 flex items-center px-5 border-b border-slate-800/90 bg-linear-to-r from-slate-950 via-slate-900 to-slate-950">
-        <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center text-white mr-3 shadow-lg shadow-blue-500/25 ring-1 ring-white/20">
+      <div className="h-17 flex items-center px-5 border-b border-slate-800/90 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center text-white mr-3 shadow-lg shadow-blue-500/25 ring-1 ring-white/20">
           <GraduationCap className="w-5 h-5 text-white" />
         </div>
         <div className="min-w-0">
@@ -70,7 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
                 onClick={() => onSelectTab(item.id)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer group text-left ${
                   isActive
-                    ? 'bg-linear-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 font-bold scale-[1.02]'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 font-bold scale-[1.02]'
                     : 'text-slate-300 hover:bg-slate-900/90 hover:text-white hover:translate-x-0.5'
                 }`}
               >
@@ -112,7 +112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
                 onClick={() => onSelectTab(item.id)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer group text-left ${
                   isActive
-                    ? 'bg-linear-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 font-bold scale-[1.02]'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 font-bold scale-[1.02]'
                     : 'text-slate-300 hover:bg-slate-900/90 hover:text-white hover:translate-x-0.5'
                 }`}
               >
@@ -142,9 +142,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
       </div>
 
       {/* User Footer Chip */}
-      <div className="p-3.5 border-t border-slate-800/90 bg-linear-to-b from-slate-950 to-slate-900">
+      <div className="p-3.5 border-t border-slate-800/90 bg-gradient-to-b from-slate-950 to-slate-900">
         <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-slate-900/80 border border-slate-800">
-          <div className="w-8.5 h-8.5 rounded-xl bg-linear-to-tr from-blue-600 to-indigo-700 flex items-center justify-center text-xs font-extrabold text-white shadow-sm ring-1 ring-white/10 shrink-0">
+          <div className="w-8.5 h-8.5 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-700 flex items-center justify-center text-xs font-extrabold text-white shadow-sm ring-1 ring-white/10 shrink-0">
             {user?.full_name ? user.full_name[0].toUpperCase() : 'U'}
           </div>
           <div className="flex-1 min-w-0">

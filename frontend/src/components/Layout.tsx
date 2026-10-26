@@ -64,7 +64,7 @@ export const Layout: React.FC<LayoutProps> = ({
           isRefreshing={isRefreshing}
           onOpenSearch={openSearch}
         />
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto pt-6 pb-14 bg-slate-50/70">
           {children}
         </main>
       </div>

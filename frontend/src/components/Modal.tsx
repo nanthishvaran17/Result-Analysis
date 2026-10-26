@@ -41,7 +41,7 @@ export const Modal: React.FC<ModalProps> = ({
       <div
         className={`bg-white rounded-2xl shadow-2xl border border-slate-200/90 w-full ${maxWidth} overflow-hidden transform transition-all animate-slide-down`}
       >
-        <div className="flex items-center justify-between px-6 py-4.5 border-b border-slate-100 bg-linear-to-r from-slate-50 via-white to-slate-50/50">
+        <div className="flex items-center justify-between px-6 py-4.5 border-b border-slate-100 bg-gradient-to-r from-slate-50 via-white to-slate-50/50">
           <div className="flex items-center gap-3">
             {icon && (
               <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shadow-2xs">

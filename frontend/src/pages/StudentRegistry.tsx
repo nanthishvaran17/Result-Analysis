@@ -98,7 +98,7 @@ export const StudentRegistry: React.FC = () => {
     try {
       const data = await api.get<Department[]>('/students/departments');
       setDepartments(data);
-    } catch {}
+    } catch { }
   };
 
   const fetchStudents = async () => {
@@ -379,8 +379,7 @@ export const StudentRegistry: React.FC = () => {
 
       const res = await api.post<any>('/students/bulk', payload);
       success(
-        `Successfully saved ${res.created_count} student record(s)!${
-          res.skipped_count > 0 ? ` (${res.skipped_count} skipped as duplicates)` : ''
+        `Successfully saved ${res.created_count} student record(s)!${res.skipped_count > 0 ? ` (${res.skipped_count} skipped as duplicates)` : ''
         }`
       );
 
@@ -409,7 +408,7 @@ export const StudentRegistry: React.FC = () => {
   return (
     <div className="p-8 space-y-6 max-w-7xl mx-auto">
       {/* Top Banner / Header Card */}
-      <div className="bg-linear-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 text-white shadow-xl border border-slate-800 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 text-white shadow-xl border border-slate-800 relative overflow-hidden">
         <div className="absolute right-0 top-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div className="space-y-1">
@@ -433,22 +432,20 @@ export const StudentRegistry: React.FC = () => {
             <div className="bg-slate-800/90 p-1 rounded-xl border border-slate-700/80 flex items-center shadow-inner">
               <button
                 onClick={() => setViewMode('directory')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  viewMode === 'directory'
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${viewMode === 'directory'
                     ? 'bg-blue-600 text-white shadow-md'
                     : 'text-slate-400 hover:text-white'
-                }`}
+                  }`}
               >
                 <Table className="w-3.5 h-3.5" />
                 <span>Directory</span>
               </button>
               <button
                 onClick={() => setViewMode('spreadsheet')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  viewMode === 'spreadsheet'
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${viewMode === 'spreadsheet'
                     ? 'bg-emerald-600 text-white shadow-md'
                     : 'text-slate-400 hover:text-white'
-                }`}
+                  }`}
               >
                 <FileSpreadsheet className="w-3.5 h-3.5" />
                 <span>Smart Excel Entry</span>
@@ -492,7 +489,7 @@ export const StudentRegistry: React.FC = () => {
                     setAddError(null);
                     setIsAddModalOpen(true);
                   }}
-                  className="flex items-center gap-1.5 px-3.5 py-2 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-600/30 cursor-pointer hover:-translate-y-0.5 active:scale-95"
+                  className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-600/30 cursor-pointer hover:-translate-y-0.5 active:scale-95"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add Single</span>
@@ -507,7 +504,7 @@ export const StudentRegistry: React.FC = () => {
       {viewMode === 'spreadsheet' && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden animate-slide-down">
           {/* Spreadsheet Header Banner */}
-          <div className="p-5 bg-linear-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-700">
+          <div className="p-5 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-700">
             <div>
               <div className="flex items-center gap-2">
                 <FileSpreadsheet className="w-5 h-5 text-emerald-400" />
@@ -586,124 +583,123 @@ export const StudentRegistry: React.FC = () => {
                 {spreadsheetRows.map((row, idx) => (
                   <tr
                     key={row.id}
-                    className={`hover:bg-blue-50/40 transition-colors ${
-                      idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'
-                    }`}
+                    className={`hover:bg-blue-50/40 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'
+                      }`}
                   >
-                      <td className="py-2 px-3 text-center text-slate-400 font-mono text-[11px]">
-                        {idx + 1}
-                      </td>
+                    <td className="py-2 px-3 text-center text-slate-400 font-mono text-[11px]">
+                      {idx + 1}
+                    </td>
 
-                      {/* Register Number */}
-                      <td className="p-1.5">
-                        <input
-                          type="text"
-                          placeholder="e.g. 710022104030"
-                          value={row.register_number}
-                          onChange={(e) =>
-                            handleSpreadsheetCellChange(idx, 'register_number', e.target.value)
-                          }
-                          className="w-full px-2.5 py-1.5 text-xs font-mono font-bold bg-white border border-slate-200 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-hidden"
-                        />
-                      </td>
+                    {/* Register Number */}
+                    <td className="p-1.5">
+                      <input
+                        type="text"
+                        placeholder="e.g. 710022104030"
+                        value={row.register_number}
+                        onChange={(e) =>
+                          handleSpreadsheetCellChange(idx, 'register_number', e.target.value)
+                        }
+                        className="w-full px-2.5 py-1.5 text-xs font-mono font-bold bg-white border border-slate-200 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-hidden"
+                      />
+                    </td>
 
-                      {/* Name */}
-                      <td className="p-1.5">
-                        <input
-                          type="text"
-                          placeholder="e.g. Koushik S"
-                          value={row.name}
-                          onChange={(e) => handleSpreadsheetCellChange(idx, 'name', e.target.value)}
-                          className="w-full px-2.5 py-1.5 text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-hidden"
-                        />
-                      </td>
+                    {/* Name */}
+                    <td className="p-1.5">
+                      <input
+                        type="text"
+                        placeholder="e.g. Koushik S"
+                        value={row.name}
+                        onChange={(e) => handleSpreadsheetCellChange(idx, 'name', e.target.value)}
+                        className="w-full px-2.5 py-1.5 text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-hidden"
+                      />
+                    </td>
 
-                      {/* Department */}
-                      <td className="p-1.5">
-                        <select
-                          value={row.department_code}
-                          onChange={(e) =>
-                            handleSpreadsheetCellChange(idx, 'department_code', e.target.value)
-                          }
-                          className="w-full px-2.5 py-1.5 text-xs font-semibold bg-white border border-slate-200 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-hidden cursor-pointer"
-                        >
-                          {departments.map((d) => (
-                            <option key={d.code} value={d.code}>
-                              {d.code}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
+                    {/* Department */}
+                    <td className="p-1.5">
+                      <select
+                        value={row.department_code}
+                        onChange={(e) =>
+                          handleSpreadsheetCellChange(idx, 'department_code', e.target.value)
+                        }
+                        className="w-full px-2.5 py-1.5 text-xs font-semibold bg-white border border-slate-200 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-hidden cursor-pointer"
+                      >
+                        {departments.map((d) => (
+                          <option key={d.code} value={d.code}>
+                            {d.code}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
 
-                      {/* Batch */}
-                      <td className="p-1.5">
-                        <select
-                          value={row.batch}
-                          onChange={(e) => handleSpreadsheetCellChange(idx, 'batch', e.target.value)}
-                          className="w-full px-2.5 py-1.5 text-xs font-semibold bg-white border border-slate-200 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-hidden cursor-pointer"
-                        >
-                          <option value="2022-2026">2022-2026</option>
-                          <option value="2023-2027">2023-2027</option>
-                          <option value="2024-2028">2024-2028</option>
-                          <option value="2025-2029">2025-2029</option>
-                        </select>
-                      </td>
+                    {/* Batch */}
+                    <td className="p-1.5">
+                      <select
+                        value={row.batch}
+                        onChange={(e) => handleSpreadsheetCellChange(idx, 'batch', e.target.value)}
+                        className="w-full px-2.5 py-1.5 text-xs font-semibold bg-white border border-slate-200 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-hidden cursor-pointer"
+                      >
+                        <option value="2022-2026">2022-2026</option>
+                        <option value="2023-2027">2023-2027</option>
+                        <option value="2024-2028">2024-2028</option>
+                        <option value="2025-2029">2025-2029</option>
+                      </select>
+                    </td>
 
-                      {/* Semester */}
-                      <td className="p-1.5 text-center">
-                        <select
-                          value={row.current_semester}
-                          onChange={(e) =>
-                            handleSpreadsheetCellChange(idx, 'current_semester', Number(e.target.value))
-                          }
-                          className="w-full px-2 py-1.5 text-xs font-bold text-center bg-white border border-slate-200 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-hidden cursor-pointer"
-                        >
-                          {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
-                            <option key={s} value={s}>
-                              Sem {s}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
+                    {/* Semester */}
+                    <td className="p-1.5 text-center">
+                      <select
+                        value={row.current_semester}
+                        onChange={(e) =>
+                          handleSpreadsheetCellChange(idx, 'current_semester', Number(e.target.value))
+                        }
+                        className="w-full px-2 py-1.5 text-xs font-bold text-center bg-white border border-slate-200 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-hidden cursor-pointer"
+                      >
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
+                          <option key={s} value={s}>
+                            Sem {s}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
 
-                      {/* Section */}
-                      <td className="p-1.5 text-center">
-                        <select
-                          value={row.section}
-                          onChange={(e) => handleSpreadsheetCellChange(idx, 'section', e.target.value)}
-                          className="w-full px-2 py-1.5 text-xs font-bold text-center bg-white border border-slate-200 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-hidden cursor-pointer"
-                        >
-                          {['A', 'B', 'C', 'D'].map((sec) => (
-                            <option key={sec} value={sec}>
-                              {sec}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
+                    {/* Section */}
+                    <td className="p-1.5 text-center">
+                      <select
+                        value={row.section}
+                        onChange={(e) => handleSpreadsheetCellChange(idx, 'section', e.target.value)}
+                        className="w-full px-2 py-1.5 text-xs font-bold text-center bg-white border border-slate-200 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-hidden cursor-pointer"
+                      >
+                        {['A', 'B', 'C', 'D'].map((sec) => (
+                          <option key={sec} value={sec}>
+                            {sec}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
 
-                      {/* Email */}
-                      <td className="p-1.5">
-                        <input
-                          type="email"
-                          placeholder="e.g. reg@college.edu"
-                          value={row.email}
-                          onChange={(e) => handleSpreadsheetCellChange(idx, 'email', e.target.value)}
-                          className="w-full px-2.5 py-1.5 text-xs text-slate-600 bg-white border border-slate-200 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-hidden"
-                        />
-                      </td>
+                    {/* Email */}
+                    <td className="p-1.5">
+                      <input
+                        type="email"
+                        placeholder="e.g. reg@college.edu"
+                        value={row.email}
+                        onChange={(e) => handleSpreadsheetCellChange(idx, 'email', e.target.value)}
+                        className="w-full px-2.5 py-1.5 text-xs text-slate-600 bg-white border border-slate-200 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-hidden"
+                      />
+                    </td>
 
-                      {/* Action */}
-                      <td className="p-1.5 text-center">
-                        <button
-                          onClick={() => removeSpreadsheetRow(idx)}
-                          title="Remove Row"
-                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                    {/* Action */}
+                    <td className="p-1.5 text-center">
+                      <button
+                        onClick={() => removeSpreadsheetRow(idx)}
+                        title="Remove Row"
+                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -832,9 +828,8 @@ export const StudentRegistry: React.FC = () => {
                     students.map((s, idx) => (
                       <tr
                         key={s.id}
-                        className={`hover:bg-blue-50/40 transition-colors group ${
-                          idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'
-                        }`}
+                        className={`hover:bg-blue-50/40 transition-colors group ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'
+                          }`}
                       >
                         <td className="py-3 px-4 font-mono font-bold text-slate-900">
                           <div className="flex items-center gap-1.5">

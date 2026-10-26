@@ -120,13 +120,13 @@ def import_students_from_file(db: Session, file_contents: bytes, filename: str) 
     missing = [c for c in required_cols if not any(c in col for col in df.columns)]
     
     # Try alternate column names if standard not found
-    reg_col = next((c for c in df.columns if "reg" in c or "roll" in c), None)
-    name_col = next((c for c in df.columns if "name" in c or "student" in c), None)
-    dept_col = next((c for c in df.columns if "dept" in c or "branch" in c or "department" in c), None)
-    batch_col = next((c for c in df.columns if "batch" in c or "year" in c), None)
-    sem_col = next((c for c in df.columns if "sem" in c), None)
-    sec_col = next((c for c in df.columns if "sec" in c), None)
-    email_col = next((c for c in df.columns if "email" in c or "mail" in c), None)
+    reg_col = next((c for c in df.columns if ("reg" in c or "roll" in c) and "controller" not in c and "instruction" not in c), None)
+    name_col = next((c for c in df.columns if "name" in c and "instruction" not in c), None)
+    dept_col = next((c for c in df.columns if ("dept" in c or "branch" in c or "department" in c) and "instruction" not in c), None)
+    batch_col = next((c for c in df.columns if ("batch" in c or "year" in c) and "instruction" not in c), None)
+    sem_col = next((c for c in df.columns if "sem" in c and "instruction" not in c), None)
+    sec_col = next((c for c in df.columns if "sec" in c and "instruction" not in c), None)
+    email_col = next((c for c in df.columns if ("email" in c or "mail" in c) and "instruction" not in c), None)
 
     if not reg_col or not name_col or not dept_col:
         summary.error_count += 1
@@ -151,6 +151,10 @@ def import_students_from_file(db: Session, file_contents: bytes, filename: str) 
         sem_val = int(row[sem_col]) if sem_col and pd.notna(row[sem_col]) and str(row[sem_col]).strip().isdigit() else 5
         sec_val = str(row[sec_col]).strip().upper() if sec_col and pd.notna(row[sec_col]) else "A"
         email_val = str(row[email_col]).strip() if email_col and pd.notna(row[email_col]) else None
+
+        # Safely ignore trailing empty rows from templates
+        if (not reg_val or reg_val == "NAN") and (not name_val or name_val == "NAN"):
+            continue
 
         if not reg_val or reg_val == "NAN":
             summary.error_count += 1
@@ -256,42 +260,56 @@ def bulk_create_students(db: Session, students_in: List[StudentCreate]) -> Dict[
 
 def generate_roster_template() -> io.BytesIO:
     """
-    Generates a beautifully styled official Excel (.xlsx) template for student cohort enrollment.
+    Generates an official, academic-grade Excel (.xlsx) template for student cohort enrollment.
+    Strictly uses Times New Roman typography, crisp all-border formatting on every cell, and a clean,
+    sober institutional design.
     """
     import openpyxl
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
 
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Student Roster Template"
-    ws.views.sheetView[0].showGridLines = True
+    if ws.views.sheetView:
+        ws.views.sheetView[0].showGridLines = True
+    else:
+        ws.sheet_view.showGridLines = True
 
-    # Styling tokens
-    font_banner = Font(name="Calibri", size=13, bold=True, color="FFFFFF")
-    font_sub = Font(name="Calibri", size=9, italic=True, color="E2E8F0")
-    font_hdr = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
-    font_row = Font(name="Calibri", size=10, color="0F172A")
+    # Styling tokens - strictly Times New Roman with clean institutional colors
+    font_title = Font(name="Times New Roman", size=13, bold=True, color="000000")
+    font_sub = Font(name="Times New Roman", size=10, italic=True, color="334155")
+    font_hdr = Font(name="Times New Roman", size=11, bold=True, color="000000")
+    font_row = Font(name="Times New Roman", size=11, color="000000")
 
-    fill_banner = PatternFill(start_color="0F172A", end_color="0F172A", fill_type="solid")
-    fill_hdr = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid")
-    fill_zebra = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
-    
-    thin = Side(border_style="thin", color="CBD5E1")
-    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+    fill_title = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid")
+    fill_sub = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
+    fill_hdr = PatternFill(start_color="E2E8F0", end_color="E2E8F0", fill_type="solid")
+    fill_white = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
 
-    # Banner
+    thin_border = Side(border_style="thin", color="000000")
+    all_border = Border(left=thin_border, right=thin_border, top=thin_border, bottom=thin_border)
+
+    def style_merged_range(sheet, min_c, min_r, max_c, max_r, font, fill, border, alignment):
+        for r in range(min_r, max_r + 1):
+            for c in range(min_c, max_c + 1):
+                cell = sheet.cell(row=r, column=c)
+                if font: cell.font = font
+                if fill: cell.fill = fill
+                if border: cell.border = border
+                if alignment: cell.alignment = alignment
+
+    # Row 1: Institutional Header
     ws.merge_cells("A1:G1")
     ws["A1"] = "OFFICE OF THE CONTROLLER OF EXAMINATIONS — STUDENT ROSTER TEMPLATE"
-    ws["A1"].font = font_banner
-    ws["A1"].fill = fill_banner
-    ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
+    style_merged_range(ws, 1, 1, 7, 1, font_title, fill_title, all_border, Alignment(horizontal="center", vertical="center"))
 
+    # Row 2: Official Instructions
     ws.merge_cells("A2:G2")
-    ws["A2"] = "Instructions: Fill student records in rows 4 onwards. 'Register Number', 'Name', 'Department', 'Batch', and 'Semester' are mandatory."
-    ws["A2"].font = font_sub
-    ws["A2"].fill = fill_banner
-    ws["A2"].alignment = Alignment(horizontal="center", vertical="center")
+    ws["A2"] = "Instructions: Fill student records in rows 4 onwards. 'Register Number', 'Name', 'Department Code', 'Batch', and 'Semester' are mandatory."
+    style_merged_range(ws, 1, 2, 7, 2, font_sub, fill_sub, all_border, Alignment(horizontal="center", vertical="center"))
 
+    # Row 3: Column Headers
     headers = [
         "Register Number", "Student Name", "Department Code", "Batch", "Current Semester", "Section", "Email Address"
     ]
@@ -299,10 +317,10 @@ def generate_roster_template() -> io.BytesIO:
         cell = ws.cell(row=3, column=col_idx, value=h)
         cell.font = font_hdr
         cell.fill = fill_hdr
+        cell.border = all_border
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-        cell.border = border
 
-    # Sample rows for guidance
+    # Sample Guidance Rows
     samples = [
         ("710022104051", "Aravindhan M", "CSE", "2022-2026", 5, "A", "710022104051@college.edu"),
         ("710022104052", "Bhavani S", "CSE", "2022-2026", 5, "B", "710022104052@college.edu"),
@@ -313,19 +331,30 @@ def generate_roster_template() -> io.BytesIO:
         for c_idx, val in enumerate(row_vals, 1):
             cell = ws.cell(row=r_idx, column=c_idx, value=val)
             cell.font = font_row
+            cell.fill = fill_white
+            cell.border = all_border
             cell.alignment = Alignment(horizontal="center" if c_idx in [1, 3, 4, 5, 6] else "left", vertical="center")
-            cell.border = border
-            if r_idx % 2 == 0:
-                cell.fill = fill_zebra
 
-    col_widths = [18, 26, 18, 16, 18, 12, 28]
+    # Pre-format entry rows 7 to 35 with all borders and Times New Roman
+    for r_idx in range(7, 36):
+        for c_idx in range(1, 8):
+            cell = ws.cell(row=r_idx, column=c_idx)
+            cell.font = font_row
+            cell.fill = fill_white
+            cell.border = all_border
+            cell.alignment = Alignment(horizontal="center" if c_idx in [1, 3, 4, 5, 6] else "left", vertical="center")
+
+    # Column Widths
+    col_widths = [20, 28, 18, 16, 18, 12, 32]
     for i, w in enumerate(col_widths, 1):
-        from openpyxl.utils import get_column_letter
         ws.column_dimensions[get_column_letter(i)].width = w
 
-    ws.row_dimensions[1].height = 24
-    ws.row_dimensions[2].height = 18
-    ws.row_dimensions[3].height = 26
+    # Row Heights
+    ws.row_dimensions[1].height = 28
+    ws.row_dimensions[2].height = 22
+    ws.row_dimensions[3].height = 28
+    for r in range(4, 36):
+        ws.row_dimensions[r].height = 22
 
     output = io.BytesIO()
     wb.save(output)
@@ -334,56 +363,70 @@ def generate_roster_template() -> io.BytesIO:
 
 def export_students_excel(students: List[Student]) -> io.BytesIO:
     """
-    Exports registered students into a high-standard Excel sheet.
+    Exports registered students into a high-standard, academic Excel sheet.
+    Strictly uses Times New Roman font, clean professional headers, and all-border cell formatting.
     """
     import openpyxl
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
 
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Student Directory"
-    ws.views.sheetView[0].showGridLines = True
+    if ws.views.sheetView:
+        ws.views.sheetView[0].showGridLines = True
+    else:
+        ws.sheet_view.showGridLines = True
 
-    font_banner = Font(name="Calibri", size=13, bold=True, color="FFFFFF")
-    font_hdr = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
-    font_row = Font(name="Calibri", size=10, color="0F172A")
-    fill_banner = PatternFill(start_color="0F172A", end_color="0F172A", fill_type="solid")
-    fill_hdr = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid")
-    fill_zebra = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
-    thin = Side(border_style="thin", color="CBD5E1")
-    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+    font_title = Font(name="Times New Roman", size=13, bold=True, color="000000")
+    font_hdr = Font(name="Times New Roman", size=11, bold=True, color="000000")
+    font_row = Font(name="Times New Roman", size=11, color="000000")
+
+    fill_title = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid")
+    fill_hdr = PatternFill(start_color="E2E8F0", end_color="E2E8F0", fill_type="solid")
+    fill_white = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
+
+    thin_border = Side(border_style="thin", color="000000")
+    all_border = Border(left=thin_border, right=thin_border, top=thin_border, bottom=thin_border)
+
+    def style_merged_range(sheet, min_c, min_r, max_c, max_r, font, fill, border, alignment):
+        for r in range(min_r, max_r + 1):
+            for c in range(min_c, max_c + 1):
+                cell = sheet.cell(row=r, column=c)
+                if font: cell.font = font
+                if fill: cell.fill = fill
+                if border: cell.border = border
+                if alignment: cell.alignment = alignment
 
     ws.merge_cells("A1:G1")
-    ws["A1"] = f"OFFICE OF CONTROLLER OF EXAMINATIONS — REGISTERED CANDIDATE ROSTER ({len(students)} Records)"
-    ws["A1"].font = font_banner
-    ws["A1"].fill = fill_banner
-    ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
+    ws["A1"] = f"OFFICE OF THE CONTROLLER OF EXAMINATIONS — REGISTERED CANDIDATE ROSTER ({len(students)} Records)"
+    style_merged_range(ws, 1, 1, 7, 1, font_title, fill_title, all_border, Alignment(horizontal="center", vertical="center"))
 
     headers = ["Register Number", "Student Name", "Department", "Batch", "Semester", "Section", "Email"]
     for col_idx, h in enumerate(headers, 1):
         cell = ws.cell(row=2, column=col_idx, value=h)
         cell.font = font_hdr
         cell.fill = fill_hdr
-        cell.alignment = Alignment(horizontal="center", vertical="center")
-        cell.border = border
+        cell.border = all_border
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
     for r_idx, s in enumerate(students, 3):
         vals = [s.register_number, s.name, s.department_code, s.batch, s.current_semester, s.section, s.email or ""]
         for c_idx, val in enumerate(vals, 1):
             cell = ws.cell(row=r_idx, column=c_idx, value=val)
             cell.font = font_row
+            cell.fill = fill_white
+            cell.border = all_border
             cell.alignment = Alignment(horizontal="center" if c_idx in [1, 3, 4, 5, 6] else "left", vertical="center")
-            cell.border = border
-            if r_idx % 2 == 0:
-                cell.fill = fill_zebra
 
-    col_widths = [18, 26, 16, 16, 14, 12, 28]
+    col_widths = [20, 28, 16, 16, 14, 12, 32]
     for i, w in enumerate(col_widths, 1):
-        from openpyxl.utils import get_column_letter
         ws.column_dimensions[get_column_letter(i)].width = w
 
-    ws.row_dimensions[1].height = 24
-    ws.row_dimensions[2].height = 24
+    ws.row_dimensions[1].height = 28
+    ws.row_dimensions[2].height = 26
+    for r in range(3, len(students) + 3):
+        ws.row_dimensions[r].height = 22
 
     output = io.BytesIO()
     wb.save(output)

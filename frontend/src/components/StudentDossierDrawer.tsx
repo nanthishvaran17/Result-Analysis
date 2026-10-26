@@ -72,7 +72,7 @@ export const StudentDossierDrawer: React.FC<StudentDossierDrawerProps> = ({ stud
         {/* Header */}
         <div className="p-6 bg-slate-950 text-white flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-12 h-12 rounded-2xl bg-linear-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-lg text-white shadow-md ring-2 ring-white/10 shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-lg text-white shadow-md ring-2 ring-white/10 shrink-0">
               {student.name[0]}
             </div>
             <div className="min-w-0">
@@ -112,7 +112,7 @@ export const StudentDossierDrawer: React.FC<StudentDossierDrawerProps> = ({ stud
 
           {/* Academic Standing KPI Card */}
           {latestResult ? (
-            <div className="p-5 bg-linear-to-r from-blue-900 to-indigo-950 rounded-2xl text-white shadow-md space-y-3">
+            <div className="p-5 bg-gradient-to-r from-blue-900 to-indigo-950 rounded-2xl text-white shadow-md space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-blue-300 uppercase tracking-wider">
                   Session Performance: {latestResult.session_code}

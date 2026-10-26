@@ -139,7 +139,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ onNavigate
   return (
     <div className="p-8 space-y-6 max-w-7xl mx-auto">
       {/* Top Banner / Session Status */}
-      <div className="bg-linear-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 text-white shadow-xl border border-slate-800 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 text-white shadow-xl border border-slate-800 relative overflow-hidden">
         <div className="absolute right-0 top-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div className="space-y-1">
@@ -164,7 +164,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ onNavigate
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => onNavigateTab('automation')}
-              className="flex items-center gap-2 px-4 py-2.5 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-600/30 cursor-pointer hover:-translate-y-0.5 active:scale-95"
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-600/30 cursor-pointer hover:-translate-y-0.5 active:scale-95"
             >
               <Play className="w-3.5 h-3.5 fill-white" />
               <span>Run Result Automation</span>

@@ -25,8 +25,8 @@ NAVY_SUBHEADER = "1E293B"    # Slate 800
 ACCENT_BLUE = "2563EB"       # Royal Blue
 ZEBRA_ROW = "F8FAFC"         # Clean Light Grey / Slate 50
 CARD_BG = "F1F5F9"           # Slate 100
-BORDER_COLOR = "CBD5E1"      # Slate 300
-BORDER_DARK = "94A3B8"       # Slate 400
+BORDER_COLOR = "94A3B8"      # Slate 400 (crisp high-contrast border)
+BORDER_DARK = "64748B"       # Slate 500
 
 PASS_FILL = "DCFCE7"         # Green 100
 PASS_FONT = "15803D"         # Green 700
@@ -39,15 +39,15 @@ INFO_FONT = "0369A1"         # Sky 700
 MUTED_FILL = "F1F5F9"        # Slate 100
 MUTED_FONT = "64748B"        # Slate 500
 
-font_title = Font(name="Calibri", size=14, bold=True, color="FFFFFF")
-font_subtitle = Font(name="Calibri", size=10, italic=True, color="CBD5E1")
-font_header = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
-font_sub_header = Font(name="Calibri", size=9, bold=False, color="E2E8F0")
-font_data = Font(name="Calibri", size=10, color="000000")
-font_bold_data = Font(name="Calibri", size=10, bold=True, color="000000")
-font_kpi_num = Font(name="Calibri", size=14, bold=True, color="0F172A")
-font_kpi_label = Font(name="Calibri", size=9, bold=True, color="64748B")
-font_summary_total = Font(name="Calibri", size=10, bold=True, color="0F172A")
+font_title = Font(name="Times New Roman", size=14, bold=True, color="FFFFFF")
+font_subtitle = Font(name="Times New Roman", size=10, italic=True, color="CBD5E1")
+font_header = Font(name="Times New Roman", size=10, bold=True, color="FFFFFF")
+font_sub_header = Font(name="Times New Roman", size=9, bold=False, color="E2E8F0")
+font_data = Font(name="Times New Roman", size=10, color="000000")
+font_bold_data = Font(name="Times New Roman", size=10, bold=True, color="000000")
+font_kpi_num = Font(name="Times New Roman", size=14, bold=True, color="0F172A")
+font_kpi_label = Font(name="Times New Roman", size=9, bold=True, color="64748B")
+font_summary_total = Font(name="Times New Roman", size=10, bold=True, color="0F172A")
 
 fill_header = PatternFill(start_color=NAVY_HEADER, end_color=NAVY_HEADER, fill_type="solid")
 fill_sub_header = PatternFill(start_color=NAVY_SUBHEADER, end_color=NAVY_SUBHEADER, fill_type="solid")
