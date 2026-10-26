@@ -115,7 +115,7 @@ def run_seed():
                 db.add(sub)
         db.commit()
 
-        # 5. Cohort Students
+        # 5. Students Cohort
         cse_names = [
             ("Aakash R", "710022104001"), ("Ananya S", "710022104002"),
             ("Balamurugan K", "710022104003"), ("Charulata M", "710022104004"),
@@ -130,7 +130,7 @@ def run_seed():
         ]
         for name, reg in cse_names:
             if not db.query(Student).filter(Student.register_number == reg).first():
-                db.add(Student(
+                s = Student(
                     register_number=reg,
                     name=name,
                     department_code="CSE",
@@ -139,15 +139,16 @@ def run_seed():
                     section="A",
                     email=f"{reg.lower()}@college.edu",
                     is_active=True
-                ))
+                )
+                db.add(s)
         db.commit()
 
-        # 6. Pre-process results for first 12 students in NOV_DEC_2025
+        # 6. Pre-process results for first 12 CSE students
+        subjects_list = db.query(Subject).all()
         target_students = db.query(Student).filter(Student.department_code == "CSE").limit(12).all()
-        cse_results = db.query(StudentResult).join(Student).filter(Student.department_code == "CSE", StudentResult.session_id == active_sess.id).count()
 
-        if cse_results < 12 and active_sess and target_students:
-            print("Executing initial verification & marksheet generation for CSE cohort...")
+        if db.query(StudentResult).filter(StudentResult.session_id == active_sess.id).count() < 12 and target_students:
+            print("Executing initial verification & marksheet generation for sample CSE cohort...")
             init_job = create_automation_job(
                 db=db,
                 session_id=active_sess.id,
@@ -162,7 +163,6 @@ def run_seed():
             init_job.completed_at = datetime.now(timezone.utc)
             db.commit()
 
-            subjects_list = db.query(Subject).all()
             for student in target_students:
                 success = process_single_student(db, init_job, student, active_sess, subjects_list)
                 init_job.processed_count += 1
@@ -179,7 +179,7 @@ def run_seed():
             res_obj = import_or_update_live_result(db, live_data, active_sess.id)
             print(f"Successfully integrated real result for: {live_data['student_name']} (GPA: {live_data['gpa']})")
         except Exception as e:
-            print(f"Failed to fetch live Nandha result during seed: {e}")
+            print(f"Live Nandha result notice: {e}")
 
         print("Nandha Engineering College platform ready with authentic data and examination cohort!")
     finally:

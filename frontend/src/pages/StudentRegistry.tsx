@@ -815,7 +815,7 @@ export const StudentRegistry: React.FC = () => {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search register number or candidate name..."
-                    className="w-full pl-10 pr-9 h-10 text-xs bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 font-medium transition-all"
+                    className="w-full pl-10 pr-9 h-10 text-xs bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 font-medium transition-all"
                   />
                   {search && (
                     <button

@@ -1,5 +1,5 @@
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.schemas.result import (
@@ -198,4 +198,100 @@ def live_fetch_coe_result(
         "courses": live_data["courses"],
         "result_id": res_obj.id
     }
+
+
+@router.get("/nandha-bulk-template")
+@router.get("/live-fetch/template")
+def download_nandha_bulk_template(current_user: User = Depends(get_current_user)):
+    """
+    Downloads an official Excel (.xlsx) roster template formatted for bulk syncing
+    credentials against the Nandha Engineering College COE portal.
+    """
+    from app.services.nandha_service import generate_nandha_bulk_template
+    buf = generate_nandha_bulk_template()
+    return Response(
+        content=buf.getvalue(),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=Nandha_COE_Bulk_Sync_Template.xlsx"}
+    )
+
+
+@router.post("/nandha-bulk-sync")
+@router.post("/live-fetch/bulk")
+def bulk_sync_nandha_records(
+    payload: dict,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(["ADMIN", "EXAM_STAFF"]))
+):
+    """
+    Takes an array of candidate credentials [{"register_number": "...", "dob": "..."}]
+    and executes sequential live extraction against the Nandha COE portal.
+    """
+    from app.services.nandha_service import bulk_sync_nandha_results
+
+    records = payload.get("records", [])
+    session_id = payload.get("session_id")
+
+    if not records or not isinstance(records, list):
+        raise HTTPException(status_code=400, detail="A non-empty list of candidate records is required.")
+
+    resolved_session_id = resolve_session_id(session_id, db)
+    report = bulk_sync_nandha_results(db, records, resolved_session_id)
+
+    client_ip = request.client.host if request.client else "unknown"
+    log_audit(
+        db=db,
+        username=current_user.username,
+        action="LIVE_COE_BULK_SYNC",
+        target_entity="StudentResult",
+        target_id=str(resolved_session_id),
+        details=f"Processed {report['total_submitted']} candidates ({report['success_count']} success, {report['failed_count']} failed)",
+        ip_address=client_ip,
+        user_id=current_user.id
+    )
+
+    return report
+
+
+@router.post("/nandha-bulk-upload")
+async def upload_nandha_bulk_file(
+    file: UploadFile = File(...),
+    session_id: Optional[int] = Form(None),
+    request: Request = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(["ADMIN", "EXAM_STAFF"]))
+):
+    """
+    Accepts an uploaded Excel (.xlsx) or CSV file with Register Numbers and DOBs,
+    parses them, and executes bulk live portal synchronization.
+    """
+    from app.services.nandha_service import parse_nandha_bulk_file, bulk_sync_nandha_results
+
+    content = await file.read()
+    records = parse_nandha_bulk_file(content, file.filename)
+
+    if not records:
+        raise HTTPException(
+            status_code=400,
+            detail="No valid candidate credentials found. Please ensure the file contains 'Register Number' and 'Date of Birth' columns."
+        )
+
+    resolved_session_id = resolve_session_id(session_id, db)
+    report = bulk_sync_nandha_results(db, records, resolved_session_id)
+
+    client_ip = request.client.host if request and request.client else "unknown"
+    log_audit(
+        db=db,
+        username=current_user.username,
+        action="LIVE_COE_BULK_UPLOAD",
+        target_entity="StudentResult",
+        target_id=str(resolved_session_id),
+        details=f"Uploaded {file.filename} with {report['total_submitted']} candidates ({report['success_count']} success, {report['failed_count']} failed)",
+        ip_address=client_ip,
+        user_id=current_user.id
+    )
+
+    return report
+
 

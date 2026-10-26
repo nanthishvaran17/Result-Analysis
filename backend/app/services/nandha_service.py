@@ -1,3 +1,5 @@
+import io
+import csv
 import re
 import requests
 from bs4 import BeautifulSoup
@@ -383,3 +385,228 @@ def import_or_update_live_result(
         print(f"Error generating marksheet PDF for {reg_no}: {e}")
 
     return student_res
+
+
+def generate_nandha_bulk_template() -> io.BytesIO:
+    """
+    Generates an official, styled Excel (.xlsx) template for bulk fetching results
+    from the Nandha Engineering College COE portal.
+    """
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Nandha Bulk Sync Template"
+    if ws.views.sheetView:
+        ws.views.sheetView[0].showGridLines = True
+    else:
+        ws.sheet_view.showGridLines = True
+
+    font_title = Font(name="Times New Roman", size=13, bold=True, color="000000")
+    font_sub = Font(name="Times New Roman", size=10, italic=True, color="334155")
+    font_hdr = Font(name="Times New Roman", size=11, bold=True, color="000000")
+    font_row = Font(name="Times New Roman", size=11, color="000000")
+
+    fill_title = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid")
+    fill_sub = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
+    fill_hdr = PatternFill(start_color="E2E8F0", end_color="E2E8F0", fill_type="solid")
+    fill_white = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
+
+    thin_border = Side(border_style="thin", color="000000")
+    all_border = Border(left=thin_border, right=thin_border, top=thin_border, bottom=thin_border)
+
+    ws.merge_cells("A1:C1")
+    t_cell = ws.cell(row=1, column=1, value="NANDHA ENGINEERING COLLEGE (AUTONOMOUS) - BULK RESULT SYNC")
+    t_cell.font = font_title
+    t_cell.fill = fill_title
+    t_cell.alignment = Alignment(horizontal="center", vertical="center")
+    ws.row_dimensions[1].height = 28
+
+    ws.merge_cells("A2:C2")
+    sub_cell = ws.cell(
+        row=2, column=1,
+        value="Enter Candidate Register Number and Date of Birth (DD/MM/YYYY). Leading zeroes in Reg No are preserved."
+    )
+    sub_cell.font = font_sub
+    sub_cell.fill = fill_sub
+    sub_cell.alignment = Alignment(horizontal="center", vertical="center")
+    ws.row_dimensions[2].height = 20
+
+    headers = [
+        "Register Number *",
+        "Date of Birth (DD/MM/YYYY) *",
+        "Student Name (Optional Reference)"
+    ]
+
+    ws.row_dimensions[3].height = 24
+    for c_idx, h in enumerate(headers, 1):
+        cell = ws.cell(row=3, column=c_idx, value=h)
+        cell.font = font_hdr
+        cell.fill = fill_hdr
+        cell.border = all_border
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+
+    samples = [
+        ("732224CC031", "01/06/2007", "Nanthish S"),
+        ("732224CC001", "15/04/2006", "Aakash M"),
+        ("732224CC002", "22/08/2006", "Bhavani R"),
+    ]
+
+    for r_idx, (reg, dob, name) in enumerate(samples, 4):
+        ws.row_dimensions[r_idx].height = 20
+        c1 = ws.cell(row=r_idx, column=1, value=reg)
+        c1.font = font_row
+        c1.fill = fill_white
+        c1.border = all_border
+        c1.number_format = "@"
+        c1.alignment = Alignment(horizontal="center", vertical="center")
+
+        c2 = ws.cell(row=r_idx, column=2, value=dob)
+        c2.font = font_row
+        c2.fill = fill_white
+        c2.border = all_border
+        c2.number_format = "@"
+        c2.alignment = Alignment(horizontal="center", vertical="center")
+
+        c3 = ws.cell(row=r_idx, column=3, value=name)
+        c3.font = font_row
+        c3.fill = fill_white
+        c3.border = all_border
+        c3.alignment = Alignment(horizontal="left", vertical="center")
+
+    ws.column_dimensions["A"].width = 24
+    ws.column_dimensions["B"].width = 28
+    ws.column_dimensions["C"].width = 34
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return output
+
+
+def parse_nandha_bulk_file(file_content: bytes, filename: str) -> List[Dict[str, str]]:
+    """
+    Parses an uploaded .xlsx, .xls, or .csv file containing student credentials
+    for bulk Nandha COE synchronization.
+    """
+    records: List[Dict[str, str]] = []
+    fname = filename.lower()
+
+    if fname.endswith(".csv"):
+        text = file_content.decode("utf-8-sig", errors="ignore")
+        reader = csv.reader(io.StringIO(text))
+        rows = list(reader)
+        if not rows:
+            return records
+
+        reg_idx, dob_idx = 0, 1
+        start_row = 0
+
+        # Scan for header
+        for r_i, row in enumerate(rows[:5]):
+            row_lower = [str(c).lower().strip() for c in row]
+            for c_i, h in enumerate(row_lower):
+                if "reg" in h or "roll" in h or "register" in h:
+                    reg_idx = c_i
+                elif "dob" in h or "birth" in h or "date" in h:
+                    dob_idx = c_i
+            if any("reg" in h for h in row_lower):
+                start_row = r_i + 1
+                break
+
+        for row in rows[start_row:]:
+            if len(row) > max(reg_idx, dob_idx):
+                reg = str(row[reg_idx]).strip().upper()
+                dob = str(row[dob_idx]).strip()
+                if reg and dob and reg != "REGISTER NUMBER":
+                    records.append({"register_number": reg, "dob": dob})
+
+    else:
+        # Excel .xlsx parsing
+        import openpyxl
+        wb = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
+        ws = wb.active
+
+        reg_col, dob_col = 1, 2
+        start_row = 1
+
+        for r in range(1, min(6, ws.max_row + 1)):
+            vals = [str(ws.cell(row=r, column=c).value or "").lower().strip() for c in range(1, ws.max_column + 1)]
+            for c_idx, val in enumerate(vals, 1):
+                if "reg" in val or "roll" in val:
+                    reg_col = c_idx
+                elif "dob" in val or "birth" in val:
+                    dob_col = c_idx
+            if any("reg" in v for v in vals):
+                start_row = r + 1
+                break
+
+        for r in range(start_row, ws.max_row + 1):
+            reg_val = ws.cell(row=r, column=reg_col).value
+            dob_val = ws.cell(row=r, column=dob_col).value
+
+            if reg_val is not None and dob_val is not None:
+                reg_str = str(reg_val).strip().upper()
+                # Handle Excel date objects
+                if isinstance(dob_val, datetime):
+                    dob_str = dob_val.strftime("%d/%m/%Y")
+                else:
+                    dob_str = str(dob_val).strip()
+
+                if reg_str and dob_str and "REGISTER" not in reg_str:
+                    records.append({"register_number": reg_str, "dob": dob_str})
+
+    return records
+
+
+def bulk_sync_nandha_results(
+    db: Session,
+    records: List[Dict[str, str]],
+    session_id: int
+) -> Dict[str, Any]:
+    """
+    Performs sequential live portal synchronization for a batch of student credentials.
+    """
+    successes = []
+    failures = []
+
+    for item in records:
+        reg_no = item.get("register_number", "").strip().upper()
+        dob = item.get("dob", "").strip()
+
+        if not reg_no or not dob:
+            failures.append({
+                "register_number": reg_no or "UNKNOWN",
+                "error": "Missing Register Number or Date of Birth"
+            })
+            continue
+
+        try:
+            live_data = fetch_live_coe_result(reg_no, dob)
+            res_obj = import_or_update_live_result(db, live_data, session_id)
+            successes.append({
+                "register_number": live_data["register_number"],
+                "student_name": live_data["student_name"],
+                "branch_name": live_data["branch_name"],
+                "gpa": live_data["gpa"],
+                "total_credits": live_data["total_credits"],
+                "earned_credits": live_data["earned_credits"],
+                "result_status": live_data["result_status"],
+                "arrears_count": live_data["arrears_count"],
+                "result_id": res_obj.id
+            })
+        except Exception as e:
+            failures.append({
+                "register_number": reg_no,
+                "error": str(e)
+            })
+
+    return {
+        "total_submitted": len(records),
+        "success_count": len(successes),
+        "failed_count": len(failures),
+        "results": successes,
+        "errors": failures
+    }
+

@@ -16,7 +16,13 @@ import {
   Globe,
   Download,
   Eye,
-  RefreshCw
+  RefreshCw,
+  FileSpreadsheet,
+  Upload,
+  Plus,
+  Trash2,
+  CheckCircle2,
+  Sparkles
 } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
@@ -47,6 +53,17 @@ export const ResultAutomationCenter: React.FC<ResultAutomationCenterProps> = ({ 
   const [liveResult, setLiveResult] = useState<any>(null);
   const [previewPdfUrl, setPreviewPdfUrl] = useState<string | null>(null);
   const [previewFileName, setPreviewFileName] = useState('');
+
+  // Dual Mode: Single vs Bulk Sheet Gateway
+  const [liveGatewayMode, setLiveGatewayMode] = useState<'single' | 'bulk'>('single');
+  const [bulkRows, setBulkRows] = useState<Array<{ id: string; register_number: string; dob: string; name: string }>>([
+    { id: '1', register_number: '732224CC031', dob: '01/06/2007', name: 'NANTHISH  S' },
+    { id: '2', register_number: '', dob: '', name: '' }
+  ]);
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [bulkReport, setBulkReport] = useState<any | null>(null);
+  const [bulkUploading, setBulkUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [activeJob, setActiveJob] = useState<AutomationJob | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -130,6 +147,139 @@ export const ResultAutomationCenter: React.FC<ResultAutomationCenterProps> = ({ 
       toastError(err.message || 'Failed to retrieve result from Nandha COE portal.');
     } finally {
       setLiveLoading(false);
+    }
+  };
+
+  const handleDownloadBulkTemplate = async () => {
+    try {
+      info('Downloading official Nandha COE Bulk Sync template (.xlsx)...');
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/v1/results/nandha-bulk-template', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Failed to generate bulk template');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Nandha_COE_Bulk_Sync_Template.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      success('Official template downloaded successfully!');
+    } catch (err: any) {
+      toastError(err.message || 'Template download failed.');
+    }
+  };
+
+  const handleBulkRowChange = (index: number, field: 'register_number' | 'dob' | 'name', value: string) => {
+    setBulkRows((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+
+      // Dynamic row auto-append: typing in last row automatically appends next empty row!
+      if (
+        index === updated.length - 1 &&
+        (value.trim().length > 0 || updated[index].register_number || updated[index].dob)
+      ) {
+        updated.push({
+          id: String(Date.now() + Math.random()),
+          register_number: '',
+          dob: '',
+          name: ''
+        });
+      }
+      return updated;
+    });
+  };
+
+  const handleAddBulkRow = () => {
+    setBulkRows((prev) => [
+      ...prev,
+      { id: String(Date.now() + Math.random()), register_number: '', dob: '', name: '' }
+    ]);
+  };
+
+  const handleRemoveBulkRow = (index: number) => {
+    if (bulkRows.length <= 1) {
+      setBulkRows([{ id: '1', register_number: '', dob: '', name: '' }]);
+      return;
+    }
+    setBulkRows((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleResetBulkRows = () => {
+    setBulkRows([
+      { id: '1', register_number: '732224CC031', dob: '01/06/2007', name: 'NANTHISH  S' },
+      { id: '2', register_number: '', dob: '', name: '' }
+    ]);
+    setBulkReport(null);
+  };
+
+  const handleBulkFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setBulkUploading(true);
+      info(`Parsing ${file.name} for candidate credentials...`);
+
+      const formData = new FormData();
+      formData.append('file', file);
+      if (selectedSession) {
+        formData.append('session_id', String(selectedSession));
+      }
+
+      const res = await api.post<any>('/results/nandha-bulk-upload', formData);
+      setBulkReport(res);
+      if (res.results && res.results.length > 0) {
+        setBulkRows(
+          res.results.map((r: any, idx: number) => ({
+            id: String(idx + 1),
+            register_number: r.register_number,
+            dob: 'VERIFIED',
+            name: r.student_name || ''
+          }))
+        );
+      }
+      success(`Bulk sync complete! Processed ${res.total_submitted} students (${res.success_count} success, ${res.failed_count} errors).`);
+      fetchData();
+    } catch (err: any) {
+      toastError(err.message || 'Bulk upload failed.');
+    } finally {
+      setBulkUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleExecuteBulkSync = async () => {
+    const validRecords = bulkRows
+      .filter((r) => r.register_number.trim() && r.dob.trim())
+      .map((r) => ({
+        register_number: r.register_number.trim().toUpperCase(),
+        dob: r.dob.trim()
+      }));
+
+    if (validRecords.length === 0) {
+      toastError('Please enter at least one candidate with both Register Number and Date of Birth');
+      return;
+    }
+
+    try {
+      setBulkLoading(true);
+      info(`Connecting to Nandha portal for ${validRecords.length} students...`);
+      const res = await api.post<any>('/results/nandha-bulk-sync', {
+        session_id: selectedSession || undefined,
+        records: validRecords
+      });
+      setBulkReport(res);
+      success(`Live sync finished! ${res.success_count} of ${res.total_submitted} marksheets verified & published.`);
+      fetchData();
+    } catch (err: any) {
+      toastError(err.message || 'Bulk synchronization failed.');
+    } finally {
+      setBulkLoading(false);
     }
   };
 
@@ -258,10 +408,11 @@ export const ResultAutomationCenter: React.FC<ResultAutomationCenterProps> = ({ 
       )}
 
       {/* Live Nandha COE Autonomous Portal Gateway */}
-      <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white rounded-2xl p-6 shadow-xl border border-blue-500/30">
+      <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white rounded-2xl p-6 shadow-xl border border-blue-500/30 space-y-5">
+        {/* Gateway Header with Mode Switcher */}
         <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-white/10 gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-blue-600 rounded-xl shadow-lg ring-2 ring-blue-400/30">
+            <div className="p-2.5 bg-blue-600 rounded-xl shadow-lg ring-2 ring-blue-400/30 shrink-0">
               <Globe className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -287,153 +438,468 @@ export const ResultAutomationCenter: React.FC<ResultAutomationCenterProps> = ({ 
               </p>
             </div>
           </div>
-          <div className="text-right">
-            <span className="text-[11px] text-slate-300 block">Target Autonomous Institution</span>
-            <span className="font-bold text-xs text-blue-300 font-mono">7322 - NANDHA ENGINEERING COLLEGE</span>
+
+          {/* Mode Switcher Tabs */}
+          <div className="flex items-center gap-1.5 p-1 bg-slate-800/80 rounded-xl border border-blue-400/20 self-start md:self-auto">
+            <button
+              type="button"
+              onClick={() => setLiveGatewayMode('single')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                liveGatewayMode === 'single'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>Single Candidate</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setLiveGatewayMode('bulk')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                liveGatewayMode === 'bulk'
+                  ? 'bg-emerald-600 text-white shadow-md'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              <span>Bulk Sheet Sync</span>
+              <span className="px-1.5 py-0.2 bg-emerald-500/30 text-emerald-200 rounded text-[9px] uppercase tracking-wider">
+                Cohort
+              </span>
+            </button>
           </div>
         </div>
 
-        {/* Live Search Form */}
-        <form onSubmit={handleLiveFetch} className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
-          <div>
-            <label className="block text-xs font-bold text-blue-200 mb-1.5">
-              Register Number <span className="text-rose-400">*</span>
-            </label>
-            <input
-              type="text"
-              value={liveRegNo}
-              onChange={(e) => setLiveRegNo(e.target.value.toUpperCase())}
-              placeholder="e.g. 732224CC031"
-              required
-              className="w-full px-3.5 py-2.5 bg-slate-800/80 border border-blue-400/30 rounded-xl text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-blue-200 mb-1.5">
-              Date of Birth (DD/MM/YYYY) <span className="text-rose-400">*</span>
-            </label>
-            <input
-              type="text"
-              value={liveDob}
-              onChange={(e) => setLiveDob(e.target.value)}
-              placeholder="01/06/2007"
-              required
-              className="w-full px-3.5 py-2.5 bg-slate-800/80 border border-blue-400/30 rounded-xl text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-500"
-            />
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={liveLoading}
-              className="w-full px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/25 transition-all cursor-pointer disabled:opacity-50"
-            >
-              {liveLoading ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Connecting to Nandha COE...</span>
-                </>
-              ) : (
-                <>
-                  <Globe className="w-4 h-4" />
-                  <span>Fetch Official Live Marksheet</span>
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-
-        {/* Live Retrieved Result Summary Card */}
-        {liveResult && (
-          <div className="mt-5 p-4 bg-white/10 backdrop-blur-md rounded-xl border border-white/15 animate-fade-in space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+        {/* --- MODE 1: SINGLE CANDIDATE QUERY --- */}
+        {liveGatewayMode === 'single' && (
+          <div className="space-y-5 animate-fade-in">
+            <form onSubmit={handleLiveFetch} className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
               <div>
-                <span className="text-[10px] uppercase tracking-wider text-blue-300 font-bold block">
-                  Candidate Credentials
-                </span>
-                <div className="text-base font-extrabold text-white flex items-center gap-2">
-                  <span>{liveResult.student_name}</span>
-                  <span className="text-xs px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 font-mono font-normal border border-blue-400/30">
-                    {liveResult.register_number}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-300 mt-0.5">{liveResult.branch_name}</p>
+                <label className="block text-xs font-bold text-blue-200 mb-1.5">
+                  Register Number <span className="text-rose-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={liveRegNo}
+                  onChange={(e) => setLiveRegNo(e.target.value.toUpperCase())}
+                  placeholder="e.g. 732224CC031"
+                  required
+                  className="w-full px-3.5 py-2.5 bg-slate-800/80 border border-blue-400/30 rounded-xl text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-500"
+                />
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="px-3 py-1.5 bg-blue-600/30 rounded-lg border border-blue-400/30 text-center">
-                  <span className="text-[10px] text-blue-200 block uppercase font-bold">SGPA</span>
-                  <span className="text-lg font-black font-mono text-emerald-400">{liveResult.gpa.toFixed(2)}</span>
-                </div>
-                <div className="px-3 py-1.5 bg-emerald-600/30 rounded-lg border border-emerald-400/30 text-center">
-                  <span className="text-[10px] text-emerald-200 block uppercase font-bold">Status</span>
-                  <span className="text-sm font-bold text-emerald-300">{liveResult.result_status}</span>
-                </div>
+              <div>
+                <label className="block text-xs font-bold text-blue-200 mb-1.5">
+                  Date of Birth (DD/MM/YYYY) <span className="text-rose-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={liveDob}
+                  onChange={(e) => setLiveDob(e.target.value)}
+                  placeholder="01/06/2007"
+                  required
+                  className="w-full px-3.5 py-2.5 bg-slate-800/80 border border-blue-400/30 rounded-xl text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-500"
+                />
               </div>
-            </div>
 
-            {/* Courses Table */}
-            {liveResult.courses && liveResult.courses.length > 0 && (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-white/10 text-blue-200 font-bold">
-                      <th className="py-2 px-2.5">Course Code</th>
-                      <th className="py-2 px-2.5">Course Name</th>
-                      <th className="py-2 px-2.5 text-center">Credits</th>
-                      <th className="py-2 px-2.5 text-center">Grade</th>
-                      <th className="py-2 px-2.5 text-center">Result</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5 font-sans">
-                    {liveResult.courses.map((c: any, idx: number) => (
-                      <tr key={idx} className="hover:bg-white/5 transition-colors">
-                        <td className="py-2 px-2.5 font-mono text-blue-300 font-bold">{c.code}</td>
-                        <td className="py-2 px-2.5 text-white">{c.name}</td>
-                        <td className="py-2 px-2.5 text-center text-slate-300">{c.credits}</td>
-                        <td className="py-2 px-2.5 text-center">
-                          <span className="px-2 py-0.5 rounded font-bold font-mono text-xs bg-blue-500/30 text-blue-200 border border-blue-400/30">
-                            {c.grade}
-                          </span>
-                        </td>
-                        <td className="py-2 px-2.5 text-center">
-                          <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                              c.result === 'PASS'
-                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                                : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                            }`}
-                          >
-                            {c.result}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div>
+                <button
+                  type="submit"
+                  disabled={liveLoading}
+                  className="w-full px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/25 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {liveLoading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Connecting to Nandha COE...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Globe className="w-4 h-4" />
+                      <span>Fetch Official Live Marksheet</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+
+            {/* Live Retrieved Single Result Card */}
+            {liveResult && (
+              <div className="p-4 bg-white/10 backdrop-blur-md rounded-xl border border-white/15 animate-fade-in space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-wider text-blue-300 font-bold block">
+                      Candidate Credentials
+                    </span>
+                    <div className="text-base font-extrabold text-white flex items-center gap-2">
+                      <span>{liveResult.student_name}</span>
+                      <span className="text-xs px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 font-mono font-normal border border-blue-400/30">
+                        {liveResult.register_number}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-300 mt-0.5">{liveResult.branch_name}</p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="px-3 py-1.5 bg-blue-600/30 rounded-lg border border-blue-400/30 text-center">
+                      <span className="text-[10px] text-blue-200 block uppercase font-bold">SGPA</span>
+                      <span className="text-lg font-black font-mono text-emerald-400">{liveResult.gpa.toFixed(2)}</span>
+                    </div>
+                    <div className="px-3 py-1.5 bg-emerald-600/30 rounded-lg border border-emerald-400/30 text-center">
+                      <span className="text-[10px] text-emerald-200 block uppercase font-bold">Status</span>
+                      <span className="text-sm font-bold text-emerald-300">{liveResult.result_status}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Courses Table */}
+                {liveResult.courses && liveResult.courses.length > 0 && (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-white/10 text-blue-200 font-bold">
+                          <th className="py-2 px-2.5">Course Code</th>
+                          <th className="py-2 px-2.5">Course Name</th>
+                          <th className="py-2 px-2.5 text-center">Credits</th>
+                          <th className="py-2 px-2.5 text-center">Grade</th>
+                          <th className="py-2 px-2.5 text-center">Result</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5 font-sans">
+                        {liveResult.courses.map((c: any, idx: number) => (
+                          <tr key={idx} className="hover:bg-white/5 transition-colors">
+                            <td className="py-2 px-2.5 font-mono text-blue-300 font-bold">{c.code}</td>
+                            <td className="py-2 px-2.5 text-white">{c.name}</td>
+                            <td className="py-2 px-2.5 text-center text-slate-300">{c.credits}</td>
+                            <td className="py-2 px-2.5 text-center">
+                              <span className="px-2 py-0.5 rounded font-bold font-mono text-xs bg-blue-500/30 text-blue-200 border border-blue-400/30">
+                                {c.grade}
+                              </span>
+                            </td>
+                            <td className="py-2 px-2.5 text-center">
+                              <span
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                  c.result === 'PASS'
+                                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                    : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                                }`}
+                              >
+                                {c.result}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* Marksheet Actions */}
+                <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => handlePreviewPdf(liveResult.register_number)}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all cursor-pointer border border-white/20"
+                  >
+                    <Eye className="w-3.5 h-3.5 text-blue-300" />
+                    <span>Preview Marksheet PDF</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadPdf(liveResult.register_number)}
+                    className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download Official Marksheet PDF</span>
+                  </button>
+                </div>
               </div>
             )}
+          </div>
+        )}
 
-            {/* Marksheet Actions */}
-            <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-white/10">
+        {/* --- MODE 2: BULK SHEET SYNCHRONIZER (COHORT MODE) --- */}
+        {liveGatewayMode === 'bulk' && (
+          <div className="space-y-4 animate-fade-in">
+            {/* Top Toolbar Actions */}
+            <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-slate-800/80 rounded-xl border border-white/10">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleDownloadBulkTemplate}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-blue-200 hover:text-white rounded-lg text-xs font-bold border border-blue-400/30 transition-all cursor-pointer"
+                  title="Download pre-formatted Excel template"
+                >
+                  <Download className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Download Bulk Template (.xlsx)</span>
+                </button>
+
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleBulkFileUpload}
+                  accept=".xlsx,.xls,.csv"
+                  className="hidden"
+                />
+
+                <button
+                  type="button"
+                  disabled={bulkUploading}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600/80 hover:bg-indigo-600 text-white rounded-lg text-xs font-bold border border-indigo-400/40 transition-all cursor-pointer disabled:opacity-50"
+                  title="Upload .xlsx or .csv sheet with Reg No and DOB"
+                >
+                  {bulkUploading ? (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Upload className="w-3.5 h-3.5" />
+                  )}
+                  <span>Upload Completed Sheet</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleAddBulkRow}
+                  className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Row</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleResetBulkRows}
+                  className="flex items-center gap-1 px-2.5 py-1.5 text-slate-400 hover:text-rose-300 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>Reset</span>
+                </button>
+              </div>
+
+              {/* Run Bulk Sync Action */}
               <button
                 type="button"
-                onClick={() => handlePreviewPdf(liveResult.register_number)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all cursor-pointer border border-white/20"
+                disabled={bulkLoading || bulkUploading}
+                onClick={handleExecuteBulkSync}
+                className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-extrabold shadow-lg shadow-emerald-600/30 hover:shadow-emerald-600/50 transition-all cursor-pointer disabled:opacity-50"
               >
-                <Eye className="w-3.5 h-3.5 text-blue-300" />
-                <span>Preview Marksheet PDF</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDownloadPdf(liveResult.register_number)}
-                className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download Official Marksheet PDF</span>
+                {bulkLoading ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Synchronizing with Nandha Portal...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    <span>
+                      Sync {bulkRows.filter((r) => r.register_number.trim() && r.dob.trim()).length} Candidates Live
+                    </span>
+                  </>
+                )}
               </button>
             </div>
+
+            {/* Smart Live Spreadsheet Table for Bulk Data */}
+            <div className="rounded-xl border border-white/10 overflow-hidden bg-slate-900/90 max-h-[360px] overflow-y-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead className="bg-slate-800 text-blue-200 font-bold sticky top-0 z-10 border-b border-white/10 uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th className="py-2.5 px-3 w-12 text-center text-slate-400">#</th>
+                    <th className="py-2.5 px-3 w-48">Register Number *</th>
+                    <th className="py-2.5 px-3 w-48">Date of Birth (DD/MM/YYYY) *</th>
+                    <th className="py-2.5 px-3">Student Name (Optional Reference)</th>
+                    <th className="py-2.5 px-3 w-16 text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5 font-sans">
+                  {bulkRows.map((row, idx) => (
+                    <tr key={row.id} className="hover:bg-white/5 transition-colors">
+                      <td className="py-2 px-3 text-center text-slate-400 font-mono text-[11px]">
+                        {idx + 1}
+                      </td>
+
+                      {/* Register Number Cell */}
+                      <td className="p-1.5">
+                        <input
+                          type="text"
+                          placeholder="e.g. 732224CC031"
+                          value={row.register_number}
+                          onChange={(e) => handleBulkRowChange(idx, 'register_number', e.target.value.toUpperCase())}
+                          className="w-full px-2.5 py-1.5 text-xs font-mono font-bold bg-slate-800 border border-blue-400/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-500"
+                        />
+                      </td>
+
+                      {/* Date of Birth Cell */}
+                      <td className="p-1.5">
+                        <input
+                          type="text"
+                          placeholder="01/06/2007"
+                          value={row.dob}
+                          onChange={(e) => handleBulkRowChange(idx, 'dob', e.target.value)}
+                          className="w-full px-2.5 py-1.5 text-xs font-mono font-semibold bg-slate-800 border border-blue-400/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-500"
+                        />
+                      </td>
+
+                      {/* Student Name Cell */}
+                      <td className="p-1.5">
+                        <input
+                          type="text"
+                          placeholder="Candidate Name"
+                          value={row.name}
+                          onChange={(e) => handleBulkRowChange(idx, 'name', e.target.value)}
+                          className="w-full px-2.5 py-1.5 text-xs bg-slate-800 border border-white/10 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-500"
+                        />
+                      </td>
+
+                      {/* Delete Row Cell */}
+                      <td className="p-1.5 text-center">
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveBulkRow(idx)}
+                          className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
+                          title="Remove row"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
+              <span>✨ Typing into the last row automatically appends the next empty row dynamically.</span>
+              <span>Total rows: <strong className="text-white">{bulkRows.length}</strong></span>
+            </div>
+
+            {/* Bulk Synchronization Execution Summary Report */}
+            {bulkReport && (
+              <div className="p-5 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 space-y-4 animate-fade-in">
+                {/* Header Metrics */}
+                <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/10">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                    <div>
+                      <h4 className="text-sm font-bold text-white font-heading">
+                        Live Bulk Synchronization Complete
+                      </h4>
+                      <p className="text-[11px] text-slate-300">
+                        Marksheets extracted, digitally verified, and persisted to institutional ledger.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className="px-3 py-1 bg-blue-500/20 border border-blue-400/30 rounded-lg">
+                      <span className="text-slate-300 text-[10px] block">TOTAL</span>
+                      <strong className="text-white font-mono text-sm">{bulkReport.total_submitted}</strong>
+                    </div>
+                    <div className="px-3 py-1 bg-emerald-500/20 border border-emerald-400/30 rounded-lg">
+                      <span className="text-emerald-300 text-[10px] block">SUCCESS</span>
+                      <strong className="text-emerald-300 font-mono text-sm">{bulkReport.success_count}</strong>
+                    </div>
+                    {bulkReport.failed_count > 0 && (
+                      <div className="px-3 py-1 bg-rose-500/20 border border-rose-400/30 rounded-lg">
+                        <span className="text-rose-300 text-[10px] block">ERRORS</span>
+                        <strong className="text-rose-300 font-mono text-sm">{bulkReport.failed_count}</strong>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Success Results Table */}
+                {bulkReport.results && bulkReport.results.length > 0 && (
+                  <div className="overflow-x-auto rounded-xl border border-white/10">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-800 text-blue-200 font-bold border-b border-white/10">
+                        <tr>
+                          <th className="py-2.5 px-3">Register Number</th>
+                          <th className="py-2.5 px-3">Candidate Name</th>
+                          <th className="py-2.5 px-3">Branch</th>
+                          <th className="py-2.5 px-3 text-center">Credits</th>
+                          <th className="py-2.5 px-3 text-center">SGPA</th>
+                          <th className="py-2.5 px-3 text-center">Status</th>
+                          <th className="py-2.5 px-3 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5 font-sans">
+                        {bulkReport.results.map((res: any, idx: number) => (
+                          <tr key={idx} className="hover:bg-white/5 transition-colors">
+                            <td className="py-2 px-3 font-mono font-bold text-blue-300">
+                              {res.register_number}
+                            </td>
+                            <td className="py-2 px-3 font-medium text-white">{res.student_name}</td>
+                            <td className="py-2 px-3 text-slate-300 text-[11px]">{res.branch_name}</td>
+                            <td className="py-2 px-3 text-center text-slate-300 font-mono">
+                              {res.total_credits}
+                            </td>
+                            <td className="py-2 px-3 text-center font-mono font-bold text-emerald-400">
+                              {res.gpa ? res.gpa.toFixed(2) : '0.00'}
+                            </td>
+                            <td className="py-2 px-3 text-center">
+                              <span
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                  res.result_status === 'PASS'
+                                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                    : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                                }`}
+                              >
+                                {res.result_status}
+                              </span>
+                            </td>
+                            <td className="py-2 px-3 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handlePreviewPdf(res.register_number)}
+                                  className="p-1 px-2 bg-white/10 hover:bg-white/20 text-white rounded text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1"
+                                  title="Preview PDF"
+                                >
+                                  <Eye className="w-3 h-3 text-blue-300" />
+                                  <span>View</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDownloadPdf(res.register_number)}
+                                  className="p-1 px-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1"
+                                  title="Download PDF"
+                                >
+                                  <Download className="w-3 h-3" />
+                                  <span>PDF</span>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* Error Breakdown Drawer (if any) */}
+                {bulkReport.errors && bulkReport.errors.length > 0 && (
+                  <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl space-y-2">
+                    <div className="flex items-center gap-2 text-rose-300 font-bold text-xs">
+                      <AlertCircle className="w-4 h-4 text-rose-400" />
+                      <span>{bulkReport.errors.length} Candidate(s) Failed to Sync:</span>
+                    </div>
+                    <div className="space-y-1">
+                      {bulkReport.errors.map((err: any, idx: number) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between text-[11px] p-2 bg-black/20 rounded-lg text-slate-300 font-mono"
+                        >
+                          <span className="font-bold text-rose-300">{err.register_number}</span>
+                          <span className="text-slate-400 font-sans">{err.error}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -1,20 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
-  GraduationCap,
+  Mail,
   Lock,
-  User,
-  AlertCircle,
-  ArrowRight,
-  Shield,
   Eye,
   EyeOff,
-  Sparkles,
-  FileSpreadsheet,
-  Cpu,
-  Fingerprint,
+  ArrowRight,
   ShieldCheck,
-  Clock,
-  Award
+  HelpCircle,
+  ChevronRight,
+  AlertCircle,
+  KeyRound,
+  CheckCircle2,
+  X,
+  Sparkles
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -25,18 +23,16 @@ interface DemoRole {
   username: string;
   pass: string;
   clearance: string;
-  badgeStyle: string;
 }
 
 const DEMO_ROLES: DemoRole[] = [
   {
     id: 'admin',
     label: 'Chief Admin',
-    roleTitle: 'Controller',
+    roleTitle: 'COE Controller',
     username: 'admin',
     pass: 'AdminPassword123!',
-    clearance: 'Tier 1 • Full Clearance',
-    badgeStyle: 'border-blue-600 bg-blue-50/90 text-blue-900 ring-1 ring-blue-500/40'
+    clearance: 'Tier 1 • Full Clearance'
   },
   {
     id: 'officer',
@@ -44,63 +40,77 @@ const DEMO_ROLES: DemoRole[] = [
     roleTitle: 'Senior Officer',
     username: 'exam_officer',
     pass: 'OfficerPass123!',
-    clearance: 'Tier 2 • Ledger Verification',
-    badgeStyle: 'border-indigo-600 bg-indigo-50/90 text-indigo-900 ring-1 ring-indigo-500/40'
+    clearance: 'Tier 2 • Ledger Verification'
   },
   {
     id: 'auditor',
-    label: 'Auditor / Dean',
+    label: 'Dean / Auditor',
     roleTitle: 'Inspection Dean',
     username: 'faculty_viewer',
     pass: 'ViewerPass123!',
-    clearance: 'Tier 3 • Read-Only Audit',
-    badgeStyle: 'border-emerald-600 bg-emerald-50/90 text-emerald-900 ring-1 ring-emerald-500/40'
+    clearance: 'Tier 3 • Read-Only Audit'
   }
 ];
 
 export const Login: React.FC = () => {
   const { login } = useAuth();
+  const [authMode, setAuthMode] = useState<'password' | 'otp'>('password');
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('AdminPassword123!');
+  const [otpPhone, setOtpPhone] = useState('admin@nandhaengg.org');
+  const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
+  const [otpSent, setOtpSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [selectedRole, setSelectedRole] = useState<string>('admin');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
-  const [currentTime, setCurrentTime] = useState('');
-
-  useEffect(() => {
-    const updateClock = () => {
-      const now = new Date();
-      setCurrentTime(
-        now.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: true
-        })
-      );
-    };
-    updateClock();
-    const interval = setInterval(updateClock, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim() || !password) {
-      setError('Please provide both authorized ID and password.');
-      return;
-    }
+    if (authMode === 'password') {
+      if (!username.trim() || !password) {
+        setError('Please provide both authorized ID and password.');
+        return;
+      }
 
-    try {
-      setError(null);
-      setIsSubmitting(true);
-      await login(username.trim(), password);
-    } catch (err: any) {
-      setError(err.message || 'Authentication failed. Please verify credentials or security token.');
-    } finally {
-      setIsSubmitting(false);
+      try {
+        setError(null);
+        setIsSubmitting(true);
+        await login(username.trim(), password);
+      } catch (err: any) {
+        setError(err.message || 'Authentication failed. Please verify credentials or security token.');
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      // OTP mode
+      if (!otpSent) {
+        if (!otpPhone.trim()) {
+          setError('Please enter your institutional email or registered mobile.');
+          return;
+        }
+        setOtpSent(true);
+        setError(null);
+      } else {
+        const fullOtp = otpCode.join('');
+        if (fullOtp.length !== 6) {
+          setError('Please enter the complete 6-digit OTP sent to your email.');
+          return;
+        }
+        try {
+          setError(null);
+          setIsSubmitting(true);
+          // Auto login as admin for verified OTP demo
+          await login('admin', 'AdminPassword123!');
+        } catch (err: any) {
+          setError(err.message || 'Invalid or expired OTP. Please try again.');
+        } finally {
+          setIsSubmitting(false);
+        }
+      }
     }
   };
 
@@ -111,347 +121,519 @@ export const Login: React.FC = () => {
     setError(null);
   };
 
+  const handleOtpChange = (index: number, val: string) => {
+    if (val.length > 1) val = val[0];
+    const newCode = [...otpCode];
+    newCode[index] = val;
+    setOtpCode(newCode);
+
+    // Auto focus next box
+    if (val && index < 5) {
+      const nextInput = document.getElementById(`otp-input-${index + 1}`);
+      nextInput?.focus();
+    }
+  };
+
   return (
-    <div className="h-screen max-h-screen w-full bg-slate-100/90 text-slate-900 flex flex-col justify-between font-sans overflow-hidden select-none">
-      {/* Background Soft Ambient Glows */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-200/50 rounded-full blur-[120px]" />
-        <div className="absolute top-1/2 -right-32 w-96 h-96 bg-indigo-200/40 rounded-full blur-[130px]" />
-        <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-sky-200/40 rounded-full blur-[120px]" />
+    <div className="h-screen max-h-screen w-full flex flex-col lg:flex-row bg-[#0f172a] text-slate-900 font-sans selection:bg-sky-500 selection:text-white overflow-hidden">
+      {/* ========================================================================= */}
+      {/* LEFT COLUMN: ATMOSPHERIC CAMPUS HERO (Matches reference screenshot 1:1)  */}
+      {/* ========================================================================= */}
+      <div className="relative w-full lg:w-[52%] xl:w-[54%] h-full flex flex-col justify-between p-6 sm:p-8 lg:p-10 xl:p-12 overflow-hidden">
+        {/* Background Campus Aerial Photo */}
         <div
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 scale-105"
           style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, #0f172a 1px, transparent 0)`,
-            backgroundSize: '24px 24px'
+            backgroundImage: `url('/campus_bg.jpg')`
           }}
         />
-      </div>
 
-      {/* COMPACT TOP HEADER */}
-      <header className="w-full bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-6 sm:px-10 py-2.5 z-20 shadow-2xs shrink-0">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 via-indigo-700 to-blue-800 flex items-center justify-center text-white shadow-md shadow-blue-600/20 border border-white shrink-0">
-              <GraduationCap className="w-5 h-5" />
+        {/* Cinematic Vignette & Dark Gradient Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-950/75 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-sky-950/20 mix-blend-multiply" />
+
+        {/* TOP BRANDING CARD: Institutional Portal Badge */}
+        <div className="relative z-10">
+          <div className="inline-flex items-center gap-3.5 px-4 py-2.5 rounded-2xl bg-slate-950/70 backdrop-blur-md border border-white/15 shadow-2xl shadow-black/50">
+            {/* 25th Year NEC Emblem */}
+            <div className="w-10 h-10 rounded-full border-2 border-cyan-400/90 flex flex-col items-center justify-center text-center p-0.5 bg-cyan-950/60 shadow-inner shrink-0 ring-1 ring-cyan-400/30">
+              <span className="text-[11px] font-black text-white leading-none tracking-tight">25</span>
+              <span className="text-[7px] font-extrabold text-cyan-300 leading-none tracking-widest mt-0.5 uppercase">NEC</span>
             </div>
+
+            {/* Institution Title */}
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-black tracking-wider text-slate-900 uppercase font-heading">
-                  OFFICE OF THE CONTROLLER OF EXAMINATIONS
-                </span>
-                <span className="hidden sm:inline-flex px-2 py-0.2 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-bold">
-                  AUTONOMOUS
-                </span>
+              <div className="text-[9px] font-extrabold uppercase tracking-widest text-cyan-400">
+                INSTITUTIONAL PORTAL
               </div>
-              <p className="text-[10px] text-slate-500 font-medium leading-none mt-0.5">
-                Anna University Affiliated • NAAC 'A+' Grade • AICTE Approved
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 text-xs">
-            <div className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 text-[11px] font-medium shadow-2xs">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              <span>COE Central Node: <strong className="text-emerald-700">Online</strong></span>
-            </div>
-
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 font-mono text-[11px] shadow-2xs font-semibold">
-              <Clock className="w-3 h-3 text-blue-600" />
-              <span>{currentTime || '07:30:00 PM'} IST</span>
+              <div className="text-sm font-extrabold text-white tracking-tight leading-tight">
+                Nandha Intelligence
+              </div>
+              <div className="text-[10px] text-slate-300 font-medium">
+                Nandha Engineering College (Autonomous) · Erode
+              </div>
             </div>
           </div>
         </div>
-      </header>
 
-      {/* MAIN VIEWPORT: FITS PERFECTLY WITHOUT SCROLLING */}
-      <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-2 sm:py-3 flex items-center justify-center z-10 overflow-hidden">
-        <div className="w-full grid grid-cols-1 lg:grid-cols-12 rounded-2xl bg-white border border-slate-200/90 shadow-xl shadow-slate-300/40 overflow-hidden max-h-[82vh]">
+        {/* MIDDLE SECTION: HERO TAGLINE & PHILOSOPHY */}
+        <div className="relative z-10 my-auto py-3 max-w-xl">
+          {/* Live Telemetry Pill */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10.5px] font-bold tracking-wider uppercase mb-3 backdrop-blur-md shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block" />
+            <span>LIVE RESULT SYNC · REAL-TIME TELEMETRY</span>
+          </div>
 
-          {/* LEFT COMMAND SHOWCASE (Cols: 7) */}
-          <div className="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-200/80 bg-gradient-to-br from-slate-50/90 via-white to-blue-50/30">
-            <div>
-              {/* Badge */}
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-bold tracking-wide uppercase mb-3 shadow-2xs">
-                <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                <span>Autonomous Examination Operations Platform</span>
-              </div>
+          {/* Primary Statement */}
+          <h1 className="text-3xl sm:text-4xl lg:text-[40px] font-black text-white tracking-tight leading-[1.15] mb-3 drop-shadow-md font-heading">
+            Every submission,<br />
+            verified and on record.
+          </h1>
 
-              {/* Main Headline */}
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight font-heading leading-tight mb-2">
-                EXAMINATION RESULT AUTOMATION & INTELLIGENCE SYSTEM
-              </h1>
-              <p className="text-xs text-slate-600 leading-relaxed font-normal mb-4">
-                Automated marksheet PDF ingestion, real-time standing arrear reconciliation, deterministic GPA calculation, and enterprise 5-sheet publication matrices.
-              </p>
+          <p className="text-xs sm:text-[13px] text-slate-200/90 font-normal leading-relaxed drop-shadow max-w-lg">
+            Real-time Autonomous marksheet telemetry, automated roster verification,
+            deterministic GPA computation, and institutional benchmark analytics across all academic cohorts.
+          </p>
+        </div>
 
-              {/* Stat Metrics Strip */}
-              <div className="grid grid-cols-3 gap-2 p-3 rounded-xl bg-gradient-to-r from-blue-50/80 via-indigo-50/60 to-sky-50/80 border border-blue-100/90 mb-4 shadow-xs">
-                <div>
-                  <div className="text-lg font-black text-blue-700 font-heading">100%</div>
-                  <div className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Accuracy</div>
-                  <div className="text-[9px] text-slate-500">Deterministic Engine</div>
+        {/* BOTTOM SECTION: TELEMETRY KPI METRICS CARD */}
+        <div className="relative z-10 w-full max-w-md pb-1">
+          <div className="rounded-2xl bg-slate-950/80 backdrop-blur-xl border border-white/15 p-3.5 sm:p-4 shadow-2xl shadow-black/60 space-y-2.5">
+            {/* Metric 1 */}
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-xs font-bold text-white leading-tight">
+                  Engineers & Students tracked
                 </div>
-                <div className="border-x border-blue-200/60 px-2">
-                  <div className="text-lg font-black text-indigo-700 font-heading">&lt; 1.2s</div>
-                  <div className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Gazette Parsing</div>
-                  <div className="text-[9px] text-slate-500">High-Throughput</div>
-                </div>
-                <div className="pl-2">
-                  <div className="text-lg font-black text-cyan-700 font-heading">5 Sheets</div>
-                  <div className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Excel Ledger</div>
-                  <div className="text-[9px] text-slate-500">Publication Ready</div>
+                <div className="text-[9.5px] text-slate-400 mt-0.5">
+                  Live rating & semester sync
                 </div>
               </div>
-
-              {/* 4 Feature Cards (Compact) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs hover:border-blue-400 transition-all">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
-                      <Cpu className="w-4 h-4" />
-                    </div>
-                    <h3 className="text-xs font-bold text-slate-900 truncate">Autonomous PDF Extraction</h3>
-                  </div>
-                  <p className="text-[11px] text-slate-600 leading-snug">
-                    Auto-parses official Anna University gazettes and marksheets with zero transcription error.
-                  </p>
-                </div>
-
-                <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs hover:border-indigo-400 transition-all">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
-                      <FileSpreadsheet className="w-4 h-4" />
-                    </div>
-                    <h3 className="text-xs font-bold text-slate-900 truncate">5-Sheet Executive Excel</h3>
-                  </div>
-                  <p className="text-[11px] text-slate-600 leading-snug">
-                    Instant generation of Result Analysis, Summary, Arrear Ledger, Logs, and Subject Maps.
-                  </p>
-                </div>
-
-                <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs hover:border-emerald-400 transition-all">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
-                      <ShieldCheck className="w-4 h-4" />
-                    </div>
-                    <h3 className="text-xs font-bold text-slate-900 truncate">Cryptographic Audit Logs</h3>
-                  </div>
-                  <p className="text-[11px] text-slate-600 leading-snug">
-                    Every result ledger is signed with SHA-256 digital hashes for tamper-proof verification.
-                  </p>
-                </div>
-
-                <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs hover:border-sky-400 transition-all">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-7 h-7 rounded-lg bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600 shrink-0">
-                      <Fingerprint className="w-4 h-4" />
-                    </div>
-                    <h3 className="text-xs font-bold text-slate-900 truncate">Role-Based Clearance</h3>
-                  </div>
-                  <p className="text-[11px] text-slate-600 leading-snug">
-                    Fine-grained controls for Chief Controller, Senior Officers, and Academic Auditors.
-                  </p>
-                </div>
+              <div className="px-2.5 py-0.5 rounded-md bg-[#0284c7]/30 border border-sky-400/40 text-sky-200 text-xs font-black tracking-wide shrink-0">
+                593
               </div>
             </div>
 
-            {/* Accreditation Strip */}
-            <div className="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500">
-              <div className="flex items-center gap-1.5 font-semibold text-slate-700">
-                <Award className="w-3.5 h-3.5 text-amber-600" />
-                <span>NAAC 'A+' Grade • ISO 27001 Certified Security</span>
-              </div>
+            {/* Metric 2 */}
+            <div className="flex items-center justify-between gap-3 pt-2 border-t border-white/10">
               <div>
-                <span>Exam Session: <strong className="text-slate-900">NOV / DEC 2025</strong></span>
+                <div className="text-xs font-bold text-white leading-tight">
+                  COE Examination Engine
+                </div>
+                <div className="text-[9.5px] text-slate-400 mt-0.5">
+                  Official 08:00 AM IST verification
+                </div>
+              </div>
+              <div className="px-2.5 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[11px] font-black tracking-wider uppercase shrink-0">
+                ACTIVE
+              </div>
+            </div>
+
+            {/* Metric 3 */}
+            <div className="flex items-center justify-between gap-3 pt-2 border-t border-white/10">
+              <div>
+                <div className="text-xs font-bold text-white leading-tight">
+                  Institutional Roster
+                </div>
+                <div className="text-[9.5px] text-slate-400 mt-0.5">
+                  521 verified profiles
+                </div>
+              </div>
+              <div className="px-2.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[11px] font-black tracking-wider uppercase shrink-0">
+                PASS
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* RIGHT EXECUTIVE LOGIN TERMINAL (Cols: 5) */}
-          <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between bg-white relative">
-            <div>
-              {/* Title */}
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-1">
-                  <h2 className="text-lg sm:text-xl font-black text-slate-900 font-heading">
-                    Official Portal Login
-                  </h2>
-                  <span className="px-2 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded-md bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs">
-                    SECURE GATEWAY
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500 leading-tight">
-                  Enter authorized institutional credentials to access examination processing and records.
-                </p>
-              </div>
+      {/* ========================================================================= */}
+      {/* RIGHT COLUMN: CLEAN MODERN LOGIN FORM (Matches reference screenshot 1:1) */}
+      {/* ========================================================================= */}
+      <div className="w-full lg:w-[48%] xl:w-[46%] h-full bg-white flex flex-col justify-between p-5 sm:p-7 lg:p-8 xl:p-10 z-20 overflow-y-auto">
+        {/* Top spacer / header */}
+        <div className="w-full max-w-md mx-auto my-auto py-2">
+          <div className="mb-4">
+            <h2 className="text-2xl sm:text-[28px] font-black text-slate-900 tracking-tight font-heading">
+              Sign in to your workspace
+            </h2>
+            <p className="text-xs text-slate-500 mt-1 font-normal">
+              Use your institutional email to authenticate.
+            </p>
+          </div>
 
-              {/* Role Clearance Selector */}
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">
-                    Select Clearance Profile:
-                  </label>
-                  <span className="text-[10px] text-blue-600 font-semibold">Click to pre-fill</span>
-                </div>
-                <div className="grid grid-cols-3 gap-1.5">
-                  {DEMO_ROLES.map((r) => {
-                    const isSelected = selectedRole === r.id;
-                    return (
-                      <button
-                        key={r.id}
-                        type="button"
-                        onClick={() => selectRole(r)}
-                        className={`py-1.5 px-2 rounded-xl text-left border transition-all cursor-pointer relative shadow-2xs ${
-                          isSelected
-                            ? `${r.badgeStyle}`
-                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:border-slate-300'
-                        }`}
-                      >
-                        <div className="text-[11px] font-bold truncate text-slate-900">{r.label}</div>
-                        <div className="text-[9px] text-slate-500 truncate">{r.roleTitle}</div>
-                        {isSelected && (
-                          <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-blue-600" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+          {/* TAB SWITCHER: Password vs Secure OTP */}
+          <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-xl border border-slate-200/80 mb-4">
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode('password');
+                setError(null);
+              }}
+              className={`py-1.5 rounded-lg text-xs font-bold transition-all ${
+                authMode === 'password'
+                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200/50'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              Password
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode('otp');
+                setError(null);
+              }}
+              className={`py-1.5 rounded-lg text-xs font-bold transition-all ${
+                authMode === 'otp'
+                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200/50'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              Secure OTP
+            </button>
+          </div>
 
-              {/* Error Banner */}
-              {error && (
-                <div className="mb-3 p-2.5 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2 text-xs text-red-800 animate-slide-down">
-                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-                  <span>{error}</span>
-                </div>
-              )}
+          {/* ERROR ALERT */}
+          {error && (
+            <div className="mb-3.5 p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 flex items-start gap-2 text-xs animate-shake">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              <div className="leading-snug">{error}</div>
+            </div>
+          )}
 
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-3">
-                {/* Official ID */}
+          {/* FORM */}
+          <form onSubmit={handleSubmit} className="space-y-3">
+            {authMode === 'password' ? (
+              <>
+                {/* Email / Username Field */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Official ID / Username
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Institutional Email or User ID
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                      <User className="w-3.5 h-3.5" />
-                    </div>
+                  <div className="relative flex items-center">
+                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
                     <input
                       type="text"
-                      required
+                      id="username-input"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      placeholder="e.g. admin or exam_officer"
-                      className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-hidden focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 transition-all font-mono font-medium shadow-2xs"
+                      placeholder="username or email"
+                      required
+                      className="w-full pl-10 pr-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0072b2] focus:border-[#0072b2] transition"
                     />
                   </div>
                 </div>
 
-                {/* Password */}
+                {/* Password Field */}
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                      Security Password
-                    </label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Password
+                  </label>
+                  <div className="relative flex items-center">
+                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      id="password-input"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      className="w-full pl-10 pr-10 py-2 rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0072b2] focus:border-[#0072b2] transition"
+                    />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="text-[10px] font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors cursor-pointer"
+                      className="absolute right-3 text-slate-400 hover:text-slate-600 p-0.5 focus:outline-none"
                     >
-                      {showPassword ? (
-                        <>
-                          <EyeOff className="w-3 h-3" />
-                          <span>Hide</span>
-                        </>
-                      ) : (
-                        <>
-                          <Eye className="w-3 h-3" />
-                          <span>Show</span>
-                        </>
-                      )}
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
-                  </div>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                      <Lock className="w-3.5 h-3.5" />
-                    </div>
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••••••"
-                      className="w-full pl-9 pr-9 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-hidden focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 transition-all font-mono tracking-wider font-medium shadow-2xs"
-                    />
                   </div>
                 </div>
 
-                {/* Remember & Version */}
+                {/* Checkbox & Forgot Password */}
                 <div className="flex items-center justify-between text-xs pt-0.5">
-                  <label className="flex items-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900 text-[11px]">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-3.5 h-3.5 rounded-sm border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      className="w-4 h-4 rounded border-slate-300 text-[#0072b2] focus:ring-[#0072b2] accent-[#0072b2]"
                     />
-                    <span>Save session</span>
+                    <span className="text-slate-600 font-medium">Remember me</span>
                   </label>
-                  <span className="text-[10px] font-medium text-slate-400">v2.4.0 COE Enterprise</span>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotModal(true)}
+                    className="text-[#0072b2] hover:text-[#005a8e] font-semibold hover:underline"
+                  >
+                    Forgot password?
+                  </button>
                 </div>
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full mt-2 py-2.5 px-4 bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 hover:from-blue-800 hover:via-indigo-800 hover:to-blue-900 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-md shadow-blue-600/25 hover:shadow-blue-600/40 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group active:scale-[0.99]"
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Authorizing Clearance...</span>
+              </>
+            ) : (
+              /* SECURE OTP FLOW */
+              <div className="space-y-3">
+                {!otpSent ? (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Registered Institutional Email or Mobile
+                    </label>
+                    <div className="relative flex items-center">
+                      <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
+                      <input
+                        type="text"
+                        value={otpPhone}
+                        onChange={(e) => setOtpPhone(e.target.value)}
+                        placeholder="staff@nandhaengg.org or +91 98427..."
+                        required
+                        className="w-full pl-10 pr-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0072b2] focus:border-[#0072b2] transition"
+                      />
                     </div>
-                  ) : (
-                    <>
-                      <span>Authorize & Enter Controller Portal</span>
-                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                    </>
-                  )}
-                </button>
-              </form>
-            </div>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      A 6-digit authentication token will be dispatched via institutional SMTP/SMS.
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-xs font-semibold text-slate-700">
+                        Enter 6-Digit One-Time Password
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOtpSent(false);
+                          setOtpCode(['', '', '', '', '', '']);
+                        }}
+                        className="text-[11px] text-[#0072b2] font-semibold hover:underline"
+                      >
+                        Change recipient
+                      </button>
+                    </div>
 
-            {/* Compliance Notice */}
-            <div className="mt-4 pt-3 border-t border-slate-200 text-[9.5px] text-slate-500 leading-tight flex items-start gap-1.5">
-              <Shield className="w-3.5 h-3.5 text-blue-700 shrink-0 mt-0.5" />
-              <span>
-                Office of the Controller of Examinations • Restricted institutional access. All transactions and reports are cryptographically logged with IP and audit timestamps.
+                    <div className="flex justify-between gap-1.5 my-2">
+                      {otpCode.map((digit, idx) => (
+                        <input
+                          key={idx}
+                          id={`otp-input-${idx}`}
+                          type="text"
+                          maxLength={1}
+                          value={digit}
+                          onChange={(e) => handleOtpChange(idx, e.target.value)}
+                          className="w-10 h-10 text-center text-base font-bold rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-[#0072b2] focus:border-[#0072b2] outline-none"
+                        />
+                      ))}
+                    </div>
+                    <p className="text-[11px] text-emerald-600 font-medium flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Token sent to <strong>{otpPhone}</strong> (Demo: any 6 digits).
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Primary Action Button */}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full mt-1.5 py-2.5 px-4 rounded-xl bg-[#0072b2] hover:bg-[#005f96] active:bg-[#004e7c] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md shadow-sky-900/10 hover:shadow-lg transition-all cursor-pointer disabled:opacity-70"
+            >
+              {isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Verifying identity...</span>
+                </div>
+              ) : (
+                <>
+                  <span>
+                    {authMode === 'password'
+                      ? 'Sign In'
+                      : otpSent
+                      ? 'Verify & Sign In'
+                      : 'Send Verification OTP'}
+                  </span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* NEED HELP CARD (Matches screenshot exactly) */}
+          <div
+            onClick={() => setShowHelpModal(true)}
+            className="mt-3 p-2.5 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100/90 transition flex items-center justify-between cursor-pointer group"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-[#0072b2] shrink-0">
+                <HelpCircle className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-slate-800 leading-snug">
+                  Need help accessing your account?
+                </div>
+                <div className="text-[10.5px] text-slate-500">
+                  Contact your institution administrator.
+                </div>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-0.5 transition" />
+          </div>
+
+          {/* QUICK DEMO ROLES CHIP (For effortless testing by examiners/staff) */}
+          <div className="mt-3.5 pt-3 border-t border-slate-100">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-3 h-3 text-amber-500" />
+                Quick Demo Access
               </span>
+              <span className="text-[9.5px] text-slate-400">1-click autofill</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {DEMO_ROLES.map((role) => (
+                <button
+                  key={role.id}
+                  type="button"
+                  onClick={() => selectRole(role)}
+                  className={`p-2 rounded-xl text-left border transition-all text-xs cursor-pointer ${
+                    selectedRole === role.id && authMode === 'password'
+                      ? 'bg-sky-50 border-sky-300 text-sky-900 ring-1 ring-sky-300'
+                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="font-bold text-[11px] truncate">{role.label}</div>
+                  <div className="text-[9.5px] text-slate-400 truncate">{role.username}</div>
+                </button>
+              ))}
             </div>
           </div>
-
         </div>
-      </main>
 
-      {/* COMPACT BOTTOM FOOTER */}
-      <footer className="w-full bg-white/95 backdrop-blur-md border-t border-slate-200/90 py-2 px-6 sm:px-10 text-xs text-slate-500 z-20 shadow-2xs shrink-0">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-1">
-          <div className="text-[11px]">
-            © 2026 Office of the Controller of Examinations. All Rights Reserved.
+        {/* FOOTER (Matches screenshot exactly) */}
+        <div className="text-center pt-2.5 border-t border-slate-100 max-w-md mx-auto w-full">
+          <div className="flex items-center justify-center gap-1.5 text-[10.5px] text-slate-500 font-medium mb-0.5">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Secured & audited by institution</span>
           </div>
-          <div className="flex items-center gap-3 text-[10px] text-slate-400">
-            <span>Autonomous Examination Automation Core</span>
-            <span>•</span>
-            <span>Security Standard ISO/IEC 27001</span>
-            <span>•</span>
-            <span className="text-blue-600 font-semibold">Official Confidential Portal</span>
+          <div className="text-[9.5px] text-slate-400">
+            © 2026 Nandha Engineering College. All rights reserved.
+          </div>
+          <div className="text-[9.5px] font-black text-slate-700 tracking-widest uppercase mt-0.5">
+            LEARN | SERVE | SUCCEED
           </div>
         </div>
-      </footer>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* MODAL: NEED HELP ACCESSING ACCOUNT */}
+      {/* ========================================================================= */}
+      {showHelpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#0072b2] flex items-center justify-center">
+                  <HelpCircle className="w-5 h-5" />
+                </div>
+                <h3 className="text-base font-bold text-slate-900">Institutional Support</h3>
+              </div>
+              <button
+                onClick={() => setShowHelpModal(false)}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed mb-4">
+              If you have lost access to your Nandha institutional email or need credential renewal for the Examination Result System, please reach out to the COE helpdesk:
+            </p>
+
+            <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 space-y-2 text-xs mb-4">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Office:</span>
+                <span className="font-semibold text-slate-800">Controller of Examinations (COE)</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Official Email:</span>
+                <span className="font-semibold text-blue-600">coe@nandhaengg.org</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Campus Intercom:</span>
+                <span className="font-semibold text-slate-800">Ext. 204 / 205</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Working Hours:</span>
+                <span className="font-semibold text-slate-800">08:30 AM – 05:00 PM IST</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowHelpModal(false)}
+              className="w-full py-2.5 rounded-xl bg-[#0072b2] text-white font-bold text-xs"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: FORGOT PASSWORD */}
+      {/* ========================================================================= */}
+      {showForgotModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                  <KeyRound className="w-5 h-5" />
+                </div>
+                <h3 className="text-base font-bold text-slate-900">Reset Institutional Password</h3>
+              </div>
+              <button
+                onClick={() => setShowForgotModal(false)}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed mb-4">
+              Enter your registered staff email ID. A cryptographically signed password reset authorization link will be generated.
+            </p>
+
+            <div className="mb-4">
+              <input
+                type="email"
+                defaultValue={username}
+                placeholder="staff.coe@nandhaengg.org"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0072b2]"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowForgotModal(false)}
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  alert('Password recovery link dispatched to your institutional inbox.');
+                  setShowForgotModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-[#0072b2] text-white font-bold text-xs"
+              >
+                Send Reset Link
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

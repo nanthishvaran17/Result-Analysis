@@ -81,27 +81,27 @@ export const Layout: React.FC<LayoutProps> = ({
       {/* Collegiate Sign Out Confirmation Dialog */}
       {showLogoutModal && (
         <div
-          className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 animate-backdrop-fade"
+          className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-backdrop-fade"
           onClick={() => setShowLogoutModal(false)}
         >
           <div
             className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-sm overflow-hidden p-6 text-center animate-modal-pop"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Centered Crimson Icon Badge */}
-            <div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 mx-auto shadow-inner mb-4">
-              <LogOut className="w-6 h-6" />
+            {/* Centered Calm Icon Badge */}
+            <div className="w-13 h-13 rounded-2xl bg-slate-100 border border-slate-200/90 flex items-center justify-center text-slate-700 mx-auto shadow-inner mb-4">
+              <LogOut className="w-5 h-5 text-slate-700" />
             </div>
 
             {/* Centered Heading & Prompt */}
             <h3 className="text-base font-extrabold text-slate-900 tracking-tight font-heading">
-              Confirm Sign Out
+              Sign Out of COE Portal
             </h3>
             <p className="text-xs text-slate-500 leading-relaxed mt-2 px-2">
-              Are you sure you want to end your active examination session? Any unsaved edits will be discarded.
+              You are signing out of your secure examination staff session. Your records and ledger updates are permanently saved.
             </p>
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[10px] font-mono text-slate-600 font-semibold mt-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200/80 text-[10px] font-mono text-slate-600 font-semibold mt-3">
               Office of the Controller • Secure Session
             </div>
 
@@ -111,9 +111,9 @@ export const Layout: React.FC<LayoutProps> = ({
                 id="cancel-signout-btn"
                 type="button"
                 onClick={() => setShowLogoutModal(false)}
-                className="w-full py-2.5 px-4 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 transition-all cursor-pointer"
+                className="w-full py-2.5 px-4 rounded-xl border border-slate-200/90 text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 transition-all cursor-pointer shadow-2xs"
               >
-                Stay Logged In
+                Stay Signed In
               </button>
               <button
                 id="confirm-signout-btn"
@@ -122,9 +122,9 @@ export const Layout: React.FC<LayoutProps> = ({
                   setShowLogoutModal(false);
                   logout();
                 }}
-                className="w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all shadow-sm shadow-rose-600/30 flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
               >
-                <LogOut className="w-3.5 h-3.5" />
+                <LogOut className="w-3.5 h-3.5 text-slate-300" />
                 Sign Out
               </button>
             </div>

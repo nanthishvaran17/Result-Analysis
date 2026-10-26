@@ -245,7 +245,7 @@ def build_result_analysis_sheet(ws, matrix):
     ws["A2"].fill = fill_header
     ws["A2"].alignment = align_center
 
-    ws.merge_cells(f"A3:{last_col_letter}3")
+    ws.merge_cells(f"A3:{last_col_letter}4")
     meta_info = (
         f"Department: {matrix.department_code or 'ALL'} | "
         f"Total Candidates: {matrix.total_students} | "
@@ -256,17 +256,20 @@ def build_result_analysis_sheet(ws, matrix):
     ws["A3"] = meta_info
     ws["A3"].font = font_subtitle
     ws["A3"].fill = fill_header
-    ws["A3"].alignment = align_center
+    ws["A3"].alignment = Alignment(horizontal="center", vertical="center")
 
-    # Style entire banner block (Rows 1 to 4) uniformly with fill_header so no visual line gap appears
+    # Style entire banner block (Rows 1 to 4) uniformly with fill_header and no interior borders
+    no_border = Border()
     for r in range(1, 5):
         for c in range(1, total_cols + 1):
-            ws.cell(row=r, column=c).fill = fill_header
+            cell = ws.cell(row=r, column=c)
+            cell.fill = fill_header
+            cell.border = no_border
 
     ws.row_dimensions[1].height = 26
     ws.row_dimensions[2].height = 20
-    ws.row_dimensions[3].height = 18
-    ws.row_dimensions[4].height = 6   # Seamless bottom buffer of dark banner
+    ws.row_dimensions[3].height = 14
+    ws.row_dimensions[4].height = 14
 
     # Row 5: Table Header
     header_row = 5
