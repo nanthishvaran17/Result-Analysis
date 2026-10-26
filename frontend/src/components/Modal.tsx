@@ -50,7 +50,7 @@ export const Modal: React.FC<ModalProps> = ({
             )}
             <div>
               <h3 className="font-bold text-slate-900 text-sm tracking-tight">{title}</h3>
-              {subtitle && <p className="text-[11px] text-slate-500 font-normal mt-0.5">{subtitle}</p>}
+              {subtitle && <p className="text-xs text-slate-700 font-medium mt-0.5">{subtitle}</p>}
             </div>
           </div>
           <button

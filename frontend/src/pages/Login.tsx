@@ -157,17 +157,17 @@ export const Login: React.FC = () => {
           <div className="inline-flex items-center gap-3.5 px-4 py-2.5 rounded-2xl bg-slate-950/70 backdrop-blur-md border border-white/15 shadow-2xl shadow-black/50">
             {/* 25th Year NEC Emblem */}
             <div className="w-10 h-10 rounded-full border-2 border-cyan-400/90 flex flex-col items-center justify-center text-center p-0.5 bg-cyan-950/60 shadow-inner shrink-0 ring-1 ring-cyan-400/30">
-              <span className="text-[11px] font-black text-white leading-none tracking-tight">25</span>
+              <span className="text-[11px] font-black text-white leading-none tracking-tight">COE</span>
               <span className="text-[7px] font-extrabold text-cyan-300 leading-none tracking-widest mt-0.5 uppercase">NEC</span>
             </div>
 
             {/* Institution Title */}
             <div>
               <div className="text-[9px] font-extrabold uppercase tracking-widest text-cyan-400">
-                INSTITUTIONAL PORTAL
+                OFFICE OF THE CONTROLLER OF EXAMINATIONS
               </div>
               <div className="text-sm font-extrabold text-white tracking-tight leading-tight">
-                Nandha Intelligence
+                Examination Result Automation Platform
               </div>
               <div className="text-[10px] text-slate-300 font-medium">
                 Nandha Engineering College (Autonomous) · Erode
@@ -181,18 +181,17 @@ export const Login: React.FC = () => {
           {/* Live Telemetry Pill */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10.5px] font-bold tracking-wider uppercase mb-3 backdrop-blur-md shadow-sm">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block" />
-            <span>LIVE RESULT SYNC · REAL-TIME TELEMETRY</span>
+            <span>AUTONOMOUS COE PORTAL · LIVE RESULT AUDIT</span>
           </div>
 
           {/* Primary Statement */}
           <h1 className="text-3xl sm:text-4xl lg:text-[40px] font-black text-white tracking-tight leading-[1.15] mb-3 drop-shadow-md font-heading">
-            Every submission,<br />
+            Every marksheet,<br />
             verified and on record.
           </h1>
 
           <p className="text-xs sm:text-[13px] text-slate-200/90 font-normal leading-relaxed drop-shadow max-w-lg">
-            Real-time Autonomous marksheet telemetry, automated roster verification,
-            deterministic GPA computation, and institutional benchmark analytics across all academic cohorts.
+            Automated marksheet PDF ingestion, real-time standing arrear reconciliation, deterministic SGPA/CGPA computation, and enterprise 5-sheet publication matrices.
           </p>
         </div>
 
@@ -203,14 +202,14 @@ export const Login: React.FC = () => {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <div className="text-xs font-bold text-white leading-tight">
-                  Engineers & Students tracked
+                  Academic Cohorts & Students
                 </div>
                 <div className="text-[9.5px] text-slate-400 mt-0.5">
-                  Live rating & semester sync
+                  Live batch & semester roster sync
                 </div>
               </div>
               <div className="px-2.5 py-0.5 rounded-md bg-[#0284c7]/30 border border-sky-400/40 text-sky-200 text-xs font-black tracking-wide shrink-0">
-                593
+                1,240+ Enrolled
               </div>
             </div>
 
@@ -218,10 +217,10 @@ export const Login: React.FC = () => {
             <div className="flex items-center justify-between gap-3 pt-2 border-t border-white/10">
               <div>
                 <div className="text-xs font-bold text-white leading-tight">
-                  COE Examination Engine
+                  COE Gazette Extraction Engine
                 </div>
                 <div className="text-[9.5px] text-slate-400 mt-0.5">
-                  Official 08:00 AM IST verification
+                  Autonomous & Anna Univ. Regulations
                 </div>
               </div>
               <div className="px-2.5 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[11px] font-black tracking-wider uppercase shrink-0">
@@ -233,14 +232,14 @@ export const Login: React.FC = () => {
             <div className="flex items-center justify-between gap-3 pt-2 border-t border-white/10">
               <div>
                 <div className="text-xs font-bold text-white leading-tight">
-                  Institutional Roster
+                  Cryptographic SHA-256 Digest
                 </div>
                 <div className="text-[9.5px] text-slate-400 mt-0.5">
-                  521 verified profiles
+                  5-Sheet Executive Excel Matrices
                 </div>
               </div>
-              <div className="px-2.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[11px] font-black tracking-wider uppercase shrink-0">
-                PASS
+              <div className="px-2.5 py-0.5 rounded-md bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 text-[11px] font-black tracking-wider uppercase shrink-0">
+                VERIFIED
               </div>
             </div>
           </div>

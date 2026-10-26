@@ -729,28 +729,22 @@ export const ResultAnalysis: React.FC<ResultAnalysisProps> = ({ activeSessionId,
 
                         {matrix?.columns.map((col) => {
                           const grade = row.grades[col.code] || '-';
-                          const isArrear = ['RA', 'SA', 'AB', 'W', 'U'].includes(grade);
+                          const isArrear = ['RA', 'SA', 'AB', 'W'].includes(grade);
                           const isHigh = ['O', 'A+'].includes(grade);
                           return (
                             <td
                               key={col.code}
-                              className="py-2.5 px-1.5 text-center border-r border-slate-100/80"
+                              className={`py-3 px-2 text-center font-bold border-r border-slate-100 ${
+                                isArrear
+                                  ? 'bg-rose-50 text-rose-700'
+                                  : isHigh
+                                  ? 'bg-emerald-50/60 text-emerald-700'
+                                  : grade !== '-'
+                                  ? 'text-slate-800'
+                                  : 'text-slate-300'
+                              }`}
                             >
-                              {grade === '-' ? (
-                                <span className="text-slate-300 text-xs font-mono">-</span>
-                              ) : isArrear ? (
-                                <span className="inline-block min-w-8 px-1.5 py-0.5 rounded-md text-[11px] font-bold font-mono bg-rose-50 text-rose-700 border border-rose-200/80 shadow-2xs">
-                                  {grade}
-                                </span>
-                              ) : isHigh ? (
-                                <span className="inline-block min-w-8 px-1.5 py-0.5 rounded-md text-[11px] font-bold font-mono bg-blue-50 text-blue-700 border border-blue-200/80 shadow-2xs">
-                                  {grade}
-                                </span>
-                              ) : (
-                                <span className="inline-block min-w-8 px-1.5 py-0.5 rounded-md text-[11px] font-semibold font-mono text-slate-700 bg-slate-50 border border-slate-200/60">
-                                  {grade}
-                                </span>
-                              )}
+                              {grade}
                             </td>
                           );
                         })}
