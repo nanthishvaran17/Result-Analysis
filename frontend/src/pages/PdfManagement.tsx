@@ -3,10 +3,12 @@ import {
   FileText,
   Search,
   Download,
+  Eye,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
 import { api } from '../api/client';
+import { PdfViewerModal } from '../components/PdfViewerModal';
 import type { ResultPdfItem } from '../types';
 
 export const PdfManagement: React.FC = () => {
@@ -17,6 +19,10 @@ export const PdfManagement: React.FC = () => {
   const [search, setSearch] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [loading, setLoading] = useState(true);
+
+  // Preview Modal
+  const [previewPdfUrl, setPreviewPdfUrl] = useState<string | null>(null);
+  const [previewFileName, setPreviewFileName] = useState<string>('');
 
   const fetchPdfs = async () => {
     try {
@@ -50,11 +56,29 @@ export const PdfManagement: React.FC = () => {
     fetchPdfs();
   };
 
+  const handlePreview = (pdfId: number, filename: string) => {
+    const token = localStorage.getItem('token');
+    const url = `/api/v1/pdfs/${pdfId}/download`;
+
+    fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Preview fetch failed');
+        return res.blob();
+      })
+      .then((blob) => {
+        const objectUrl = window.URL.createObjectURL(blob);
+        setPreviewPdfUrl(objectUrl);
+        setPreviewFileName(filename);
+      })
+      .catch((err) => alert(err.message));
+  };
+
   const handleDownload = (pdfId: number, filename: string) => {
     const token = localStorage.getItem('token');
     const url = `/api/v1/pdfs/${pdfId}/download`;
 
-    // Fetch as blob with auth header
     fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -171,13 +195,22 @@ export const PdfManagement: React.FC = () => {
                       </span>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <button
-                        onClick={() => handleDownload(pdf.id, pdf.file_name)}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md font-semibold text-[11px] transition-colors cursor-pointer"
-                      >
-                        <Download className="w-3.5 h-3.5 text-blue-600" />
-                        <span>Download PDF</span>
-                      </button>
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          onClick={() => handlePreview(pdf.id, pdf.file_name)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-md font-semibold text-[11px] border border-blue-200 transition-colors cursor-pointer"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Preview</span>
+                        </button>
+                        <button
+                          onClick={() => handleDownload(pdf.id, pdf.file_name)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md font-semibold text-[11px] transition-colors cursor-pointer"
+                        >
+                          <Download className="w-3.5 h-3.5 text-slate-600" />
+                          <span>Download</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -219,6 +252,17 @@ export const PdfManagement: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* PDF Viewer Dialog */}
+      <PdfViewerModal
+        isOpen={!!previewPdfUrl}
+        onClose={() => {
+          if (previewPdfUrl) window.URL.revokeObjectURL(previewPdfUrl);
+          setPreviewPdfUrl(null);
+        }}
+        pdfUrl={previewPdfUrl}
+        fileName={previewFileName}
+      />
     </div>
   );
 };

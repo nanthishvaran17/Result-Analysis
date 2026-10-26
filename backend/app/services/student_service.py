@@ -193,3 +193,199 @@ def import_students_from_file(db: Session, file_contents: bytes, filename: str) 
         db.commit()
 
     return summary
+
+def bulk_create_students(db: Session, students_in: List[StudentCreate]) -> Dict[str, Any]:
+    """
+    Directly persists a batch of student records entered via the live UI spreadsheet grid.
+    Automatically handles existing duplicates and ensures academic departments exist.
+    """
+    departments_cache = {d.code: d for d in db.query(Department).all()}
+    existing_reg_nos = {r[0] for r in db.query(Student.register_number).all()}
+    
+    created_list: List[Student] = []
+    skipped_list: List[Dict[str, str]] = []
+
+    for item in students_in:
+        reg_no = (item.register_number or "").strip().upper()
+        name = (item.name or "").strip()
+        dept = (item.department_code or "CSE").strip().upper()
+        batch = (item.batch or "2022-2026").strip()
+        semester = item.current_semester or 5
+        section = (item.section or "A").strip().upper()
+        email = (item.email or f"{reg_no.lower()}@college.edu").strip()
+
+        if not reg_no or not name:
+            skipped_list.append({"register_number": reg_no or "N/A", "reason": "Missing Register Number or Name"})
+            continue
+
+        if reg_no in existing_reg_nos:
+            skipped_list.append({"register_number": reg_no, "reason": "Already exists in database"})
+            continue
+
+        if dept not in departments_cache:
+            dept_obj = Department(code=dept, name=f"Department of {dept}")
+            db.add(dept_obj)
+            db.flush()
+            departments_cache[dept] = dept_obj
+
+        s = Student(
+            register_number=reg_no,
+            name=name,
+            department_code=dept,
+            batch=batch,
+            current_semester=semester,
+            section=section,
+            email=email,
+            is_active=True
+        )
+        created_list.append(s)
+        existing_reg_nos.add(reg_no)
+
+    if created_list:
+        db.add_all(created_list)
+        db.commit()
+        for s in created_list:
+            db.refresh(s)
+
+    return {
+        "created_count": len(created_list),
+        "skipped_count": len(skipped_list),
+        "skipped": skipped_list,
+        "created_ids": [s.id for s in created_list]
+    }
+
+def generate_roster_template() -> io.BytesIO:
+    """
+    Generates a beautifully styled official Excel (.xlsx) template for student cohort enrollment.
+    """
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Student Roster Template"
+    ws.views.sheetView[0].showGridLines = True
+
+    # Styling tokens
+    font_banner = Font(name="Calibri", size=13, bold=True, color="FFFFFF")
+    font_sub = Font(name="Calibri", size=9, italic=True, color="E2E8F0")
+    font_hdr = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
+    font_row = Font(name="Calibri", size=10, color="0F172A")
+
+    fill_banner = PatternFill(start_color="0F172A", end_color="0F172A", fill_type="solid")
+    fill_hdr = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid")
+    fill_zebra = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
+    
+    thin = Side(border_style="thin", color="CBD5E1")
+    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+    # Banner
+    ws.merge_cells("A1:G1")
+    ws["A1"] = "OFFICE OF THE CONTROLLER OF EXAMINATIONS — STUDENT ROSTER TEMPLATE"
+    ws["A1"].font = font_banner
+    ws["A1"].fill = fill_banner
+    ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
+
+    ws.merge_cells("A2:G2")
+    ws["A2"] = "Instructions: Fill student records in rows 4 onwards. 'Register Number', 'Name', 'Department', 'Batch', and 'Semester' are mandatory."
+    ws["A2"].font = font_sub
+    ws["A2"].fill = fill_banner
+    ws["A2"].alignment = Alignment(horizontal="center", vertical="center")
+
+    headers = [
+        "Register Number", "Student Name", "Department Code", "Batch", "Current Semester", "Section", "Email Address"
+    ]
+    for col_idx, h in enumerate(headers, 1):
+        cell = ws.cell(row=3, column=col_idx, value=h)
+        cell.font = font_hdr
+        cell.fill = fill_hdr
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell.border = border
+
+    # Sample rows for guidance
+    samples = [
+        ("710022104051", "Aravindhan M", "CSE", "2022-2026", 5, "A", "710022104051@college.edu"),
+        ("710022104052", "Bhavani S", "CSE", "2022-2026", 5, "B", "710022104052@college.edu"),
+        ("710022106001", "Chandran P", "ECE", "2023-2027", 3, "A", "710022106001@college.edu"),
+    ]
+
+    for r_idx, row_vals in enumerate(samples, 4):
+        for c_idx, val in enumerate(row_vals, 1):
+            cell = ws.cell(row=r_idx, column=c_idx, value=val)
+            cell.font = font_row
+            cell.alignment = Alignment(horizontal="center" if c_idx in [1, 3, 4, 5, 6] else "left", vertical="center")
+            cell.border = border
+            if r_idx % 2 == 0:
+                cell.fill = fill_zebra
+
+    col_widths = [18, 26, 18, 16, 18, 12, 28]
+    for i, w in enumerate(col_widths, 1):
+        from openpyxl.utils import get_column_letter
+        ws.column_dimensions[get_column_letter(i)].width = w
+
+    ws.row_dimensions[1].height = 24
+    ws.row_dimensions[2].height = 18
+    ws.row_dimensions[3].height = 26
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return output
+
+def export_students_excel(students: List[Student]) -> io.BytesIO:
+    """
+    Exports registered students into a high-standard Excel sheet.
+    """
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Student Directory"
+    ws.views.sheetView[0].showGridLines = True
+
+    font_banner = Font(name="Calibri", size=13, bold=True, color="FFFFFF")
+    font_hdr = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
+    font_row = Font(name="Calibri", size=10, color="0F172A")
+    fill_banner = PatternFill(start_color="0F172A", end_color="0F172A", fill_type="solid")
+    fill_hdr = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid")
+    fill_zebra = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
+    thin = Side(border_style="thin", color="CBD5E1")
+    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+    ws.merge_cells("A1:G1")
+    ws["A1"] = f"OFFICE OF CONTROLLER OF EXAMINATIONS — REGISTERED CANDIDATE ROSTER ({len(students)} Records)"
+    ws["A1"].font = font_banner
+    ws["A1"].fill = fill_banner
+    ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
+
+    headers = ["Register Number", "Student Name", "Department", "Batch", "Semester", "Section", "Email"]
+    for col_idx, h in enumerate(headers, 1):
+        cell = ws.cell(row=2, column=col_idx, value=h)
+        cell.font = font_hdr
+        cell.fill = fill_hdr
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+        cell.border = border
+
+    for r_idx, s in enumerate(students, 3):
+        vals = [s.register_number, s.name, s.department_code, s.batch, s.current_semester, s.section, s.email or ""]
+        for c_idx, val in enumerate(vals, 1):
+            cell = ws.cell(row=r_idx, column=c_idx, value=val)
+            cell.font = font_row
+            cell.alignment = Alignment(horizontal="center" if c_idx in [1, 3, 4, 5, 6] else "left", vertical="center")
+            cell.border = border
+            if r_idx % 2 == 0:
+                cell.fill = fill_zebra
+
+    col_widths = [18, 26, 16, 16, 14, 12, 28]
+    for i, w in enumerate(col_widths, 1):
+        from openpyxl.utils import get_column_letter
+        ws.column_dimensions[get_column_letter(i)].width = w
+
+    ws.row_dimensions[1].height = 24
+    ws.row_dimensions[2].height = 24
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return output
