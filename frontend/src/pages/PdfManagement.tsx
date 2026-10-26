@@ -149,20 +149,23 @@ export const PdfManagement: React.FC = () => {
           />
         </form>
 
-        <div className="flex items-center gap-2.5">
-          <select
+        <div className="w-64">
+          <CustomDropdown
             value={selectedStatus}
-            onChange={(e) => {
-              setSelectedStatus(e.target.value);
+            onChange={(val) => {
+              setSelectedStatus(val);
               setPage(1);
             }}
-            className="px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-hidden cursor-pointer"
-          >
-            <option value="">All Verification Statuses</option>
-            <option value="VERIFIED">Verified (Clean)</option>
-            <option value="FLAGGED">Flagged / Ambiguous</option>
-            <option value="PARSED">Parsed (Pending Verification)</option>
-          </select>
+            options={[
+              { value: '', label: 'All Verification Statuses' },
+              { value: 'VERIFIED', label: 'Verified (Clean)', badge: 'CLEAN' },
+              { value: 'FLAGGED', label: 'Flagged / Ambiguous', badge: 'ALERT' },
+              { value: 'PARSED', label: 'Parsed (Pending)', badge: 'QUEUE' },
+            ]}
+            icon={Filter}
+            size="sm"
+            placeholder="Filter Status..."
+          />
         </div>
       </div>
 

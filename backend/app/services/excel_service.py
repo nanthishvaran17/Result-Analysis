@@ -24,6 +24,7 @@ NAVY_HEADER = "0F172A"       # Deep Slate 900
 NAVY_SUBHEADER = "1E293B"    # Slate 800
 ACCENT_BLUE = "2563EB"       # Royal Blue
 ZEBRA_ROW = "F8FAFC"         # Clean Light Grey / Slate 50
+CARD_BG = "F1F5F9"           # Slate 100
 BORDER_COLOR = "000000"      # Standard crisp black border (True All Borders)
 BORDER_DARK = "000000"
 
@@ -807,9 +808,11 @@ def build_processing_log_sheet(ws, db, matrix):
         ws.row_dimensions[r].height = 20
         row_fill = fill_zebra if i % 2 == 0 else fill_white
 
+        reg_str = str(l.register_number).strip() if l.register_number else "-"
+        reg_val = int(reg_str) if reg_str.isdigit() and not reg_str.startswith("0") else reg_str
         vals = [
             (l.id, align_center, None),
-            (str(l.register_number), align_center, "@"),
+            (reg_val, align_center, "0" if isinstance(reg_val, int) else None),
             (l.student_name or "-", align_left, None),
             (l.stage, align_center, None),
             (l.status, align_center, None),
@@ -830,13 +833,13 @@ def build_processing_log_sheet(ws, db, matrix):
             if c_idx == 5:
                 st_upper = str(v).upper()
                 if "SUCCESS" in st_upper or "COMPLETE" in st_upper:
-                    cl.font = Font(name="Calibri", size=10, bold=True, color=PASS_FONT)
+                    cl.font = Font(name="Times New Roman", size=10, bold=True, color=PASS_FONT)
                     cl.fill = PatternFill(start_color=PASS_FILL, end_color=PASS_FILL, fill_type="solid")
                 elif "FAIL" in st_upper or "ERROR" in st_upper:
-                    cl.font = Font(name="Calibri", size=10, bold=True, color=FAIL_FONT)
+                    cl.font = Font(name="Times New Roman", size=10, bold=True, color=FAIL_FONT)
                     cl.fill = PatternFill(start_color=FAIL_FILL, end_color=FAIL_FILL, fill_type="solid")
                 elif "PEND" in st_upper or "PROCESS" in st_upper or "RUN" in st_upper:
-                    cl.font = Font(name="Calibri", size=10, bold=True, color=AMBER_FONT)
+                    cl.font = Font(name="Times New Roman", size=10, bold=True, color=AMBER_FONT)
                     cl.fill = PatternFill(start_color=AMBER_FILL, end_color=AMBER_FILL, fill_type="solid")
 
     # Summary Total Row
@@ -1038,6 +1041,25 @@ def generate_enterprise_excel_report(
 
     # Remove initial empty sheet
     wb.remove(default_sheet)
+
+    # Strictly enforce Times New Roman on every cell across all worksheets
+    for ws_each in wb.worksheets:
+        for row in ws_each.iter_rows():
+            for cell in row:
+                if cell.font:
+                    if cell.font.name != "Times New Roman":
+                        cell.font = Font(
+                            name="Times New Roman",
+                            size=cell.font.size,
+                            bold=cell.font.bold,
+                            italic=cell.font.italic,
+                            vertAlign=cell.font.vertAlign,
+                            underline=cell.font.underline,
+                            strike=cell.font.strike,
+                            color=cell.font.color
+                        )
+                else:
+                    cell.font = font_data
 
     # File naming & storage
     timestamp_str = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")

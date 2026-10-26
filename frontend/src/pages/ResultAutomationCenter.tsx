@@ -8,11 +8,16 @@ import {
   Terminal,
   ShieldCheck,
   FileCheck,
-  Cpu
+  Cpu,
+  Building2,
+  Calendar,
+  GraduationCap,
+  Clock
 } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { CustomDropdown } from '../components/CustomDropdown';
 import type { ExamSession, Department, AutomationJob } from '../types';
 
 interface ResultAutomationCenterProps {
@@ -227,62 +232,67 @@ export const ResultAutomationCenter: React.FC<ResultAutomationCenterProps> = ({ 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
               <label className="block font-bold text-slate-700 mb-1.5">Examination Session *</label>
-              <select
+              <CustomDropdown
                 value={selectedSession}
-                onChange={(e) => setSelectedSession(Number(e.target.value))}
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600 cursor-pointer"
-              >
-                <option value="">Select Session</option>
-                {sessions.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.session_code} - {s.session_name}
-                  </option>
-                ))}
-              </select>
+                onChange={(val: any) => setSelectedSession(val ? Number(val) : '')}
+                options={sessions.map((s) => ({
+                  value: s.id,
+                  label: s.session_code,
+                  badge: s.is_active ? 'Active' : undefined,
+                  sublabel: s.session_name || undefined,
+                }))}
+                icon={Calendar}
+                placeholder="Select Session"
+              />
             </div>
 
             <div>
               <label className="block font-bold text-slate-700 mb-1.5">Academic Department</label>
-              <select
+              <CustomDropdown
                 value={selectedDept}
-                onChange={(e) => setSelectedDept(e.target.value)}
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600 cursor-pointer"
-              >
-                <option value="">All Departments</option>
-                {departments.map((d) => (
-                  <option key={d.code} value={d.code}>
-                    {d.code} - {d.name}
-                  </option>
-                ))}
-              </select>
+                onChange={(val: any) => setSelectedDept(val)}
+                options={[
+                  { value: '', label: 'All Departments' },
+                  ...departments.map((d) => ({
+                    value: d.code,
+                    label: d.name,
+                    badge: d.code,
+                  })),
+                ]}
+                icon={Building2}
+                placeholder="Select Department"
+              />
             </div>
 
             <div>
               <label className="block font-bold text-slate-700 mb-1.5">Batch Cohort</label>
-              <select
+              <CustomDropdown
                 value={selectedBatch}
-                onChange={(e) => setSelectedBatch(e.target.value)}
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600 cursor-pointer"
-              >
-                <option value="2022-2026">2022-2026</option>
-                <option value="2023-2027">2023-2027</option>
-                <option value="2024-2028">2024-2028</option>
-              </select>
+                onChange={(val: any) => setSelectedBatch(val)}
+                options={[
+                  { value: '2022-2026', label: '2022-2026 Cohort', badge: 'Final Yr' },
+                  { value: '2023-2027', label: '2023-2027 Cohort', badge: '3rd Yr' },
+                  { value: '2024-2028', label: '2024-2028 Cohort', badge: '2nd Yr' },
+                  { value: '2025-2029', label: '2025-2029 Cohort', badge: '1st Yr' },
+                ]}
+                icon={GraduationCap}
+                placeholder="Select Batch"
+              />
             </div>
 
             <div>
               <label className="block font-bold text-slate-700 mb-1.5">Semester</label>
-              <select
+              <CustomDropdown
                 value={selectedSemester}
-                onChange={(e) => setSelectedSemester(Number(e.target.value))}
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600 cursor-pointer"
-              >
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
-                  <option key={s} value={s}>
-                    Semester {s}
-                  </option>
-                ))}
-              </select>
+                onChange={(val: any) => setSelectedSemester(Number(val))}
+                options={[1, 2, 3, 4, 5, 6, 7, 8].map((s) => ({
+                  value: s,
+                  label: `Semester ${s}`,
+                  badge: `SEM ${s}`,
+                }))}
+                icon={Clock}
+                placeholder="Select Semester"
+              />
             </div>
           </div>
 
