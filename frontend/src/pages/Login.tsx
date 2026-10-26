@@ -15,7 +15,7 @@ import {
   Shield,
   FileSpreadsheet,
   Award,
-  Smartphone,
+  Sparkles,
   Check
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -66,12 +66,8 @@ const DEMO_ROLES: DemoRole[] = [
 
 export const Login: React.FC = () => {
   const { login } = useAuth();
-  const [authMode, setAuthMode] = useState<'password' | 'otp'>('password');
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('AdminPassword123!');
-  const [otpPhone, setOtpPhone] = useState('admin@nandhaengg.org');
-  const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
-  const [otpSent, setOtpSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [selectedRole, setSelectedRole] = useState<string>('admin');
@@ -82,47 +78,19 @@ export const Login: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (authMode === 'password') {
-      if (!username.trim() || !password) {
-        setError('Please provide both authorized ID and password.');
-        return;
-      }
+    if (!username.trim() || !password) {
+      setError('Please provide both authorized ID and password.');
+      return;
+    }
 
-      try {
-        setError(null);
-        setIsSubmitting(true);
-        await login(username.trim(), password);
-      } catch (err: any) {
-        setError(err.message || 'Authentication failed. Please verify credentials or security token.');
-      } finally {
-        setIsSubmitting(false);
-      }
-    } else {
-      // OTP mode
-      if (!otpSent) {
-        if (!otpPhone.trim()) {
-          setError('Please enter your institutional email or registered mobile.');
-          return;
-        }
-        setOtpSent(true);
-        setError(null);
-      } else {
-        const fullOtp = otpCode.join('');
-        if (fullOtp.length !== 6) {
-          setError('Please enter the complete 6-digit OTP sent to your email.');
-          return;
-        }
-        try {
-          setError(null);
-          setIsSubmitting(true);
-          // Auto login as admin for verified OTP demo
-          await login('admin', 'AdminPassword123!');
-        } catch (err: any) {
-          setError(err.message || 'Invalid or expired OTP. Please try again.');
-        } finally {
-          setIsSubmitting(false);
-        }
-      }
+    try {
+      setError(null);
+      setIsSubmitting(true);
+      await login(username.trim(), password);
+    } catch (err: any) {
+      setError(err.message || 'Authentication failed. Please verify credentials or security token.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

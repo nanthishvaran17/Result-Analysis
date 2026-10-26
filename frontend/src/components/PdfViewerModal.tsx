@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Download, FileText, Globe, Printer, ExternalLink, ShieldCheck } from 'lucide-react';
-import api from '../services/api';
+import { X, Download, FileText, Globe, Printer, ShieldCheck } from 'lucide-react';
+import { api } from '../api/client';
 
 interface CourseItem {
   code: string;
@@ -334,6 +334,31 @@ export const PdfViewerModal: React.FC<PdfViewerModalProps> = ({
                       </tr>
                     </tbody>
                   </table>
+                </div>
+              </div>
+
+              {/* Official Seal & Formal Signatures Block */}
+              <div className="pt-4 grid grid-cols-3 items-center gap-4 text-center border-t border-slate-200">
+                <div className="text-left space-y-1">
+                  <div className="h-7 border-b border-slate-400 w-36"></div>
+                  <div className="text-xs font-bold text-slate-800">Prepared & Verified by</div>
+                  <div className="text-[10px] text-slate-500 font-medium">Office Superintendent</div>
+                </div>
+
+                {/* Official Embossed College Seal */}
+                <div className="flex justify-center">
+                  <div className="border-2 border-blue-900 rounded-xl p-2 bg-blue-50/60 shadow-2xs max-w-[210px] space-y-0.5">
+                    <div className="text-[8px] font-black tracking-wider text-slate-800 uppercase">★ Office of the COE ★</div>
+                    <div className="text-[10px] font-black text-blue-900 uppercase tracking-tight">Nandha Engg College</div>
+                    <div className="text-[7.5px] font-bold text-slate-600 uppercase">Autonomous • Erode-52</div>
+                    <div className="text-[8px] font-black text-emerald-700 uppercase tracking-widest pt-0.5">Official Seal</div>
+                  </div>
+                </div>
+
+                <div className="text-right space-y-1 flex flex-col items-end">
+                  <div className="h-7 border-b border-slate-400 w-44"></div>
+                  <div className="text-xs font-bold text-slate-800">Controller of Examinations</div>
+                  <div className="text-[10px] text-slate-500 font-medium">Nandha Engineering College (Autonomous)</div>
                 </div>
               </div>
 
